@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import useFetchPodcasts from "../utilities/fetchPodcasts";
+import { useFetchPodcasts } from "../utilities/fetchPodcasts";
 import LoadingSpinner from "../utilities/loadingSpinner";
 import ErrorDisplay from "../utilities/loadingError";
 import { IMAGES } from "../data/images";
@@ -143,42 +143,107 @@ const PodcastDetail = () => {
     };
 
     // Episode button component
+    // In your PodcastDetail component, update the EpisodeButton component:
     const EpisodeButton = ({ episode, seasonNumber }) => {
+        const [isFavorited, setIsFavorited] = useState(false);
+
+        useEffect(() => {
+            // Check if this episode is already favorited
+            const savedFavorites = localStorage.getItem('podcastFavorites');
+            if (savedFavorites) {
+                const favorites = JSON.parse(savedFavorites);
+                const isAlreadyFavorited = favorites.some(fav => 
+                    fav.episodeId === `${podcastData.id}-s${seasonNumber}-e${episode.episode}`
+                );
+                setIsFavorited(isAlreadyFavorited);
+            }
+        }, [episode.episode, seasonNumber, podcastData.id]);
+
         const handlePlayEpisode = () => {
+            console.log(`Playing episode: ${episode.title}`, episode.file);
+        };
+
+        const handleToggleFavorite = (e) => {
+            e.stopPropagation();
+            
+            const favoriteData = {
+                episodeId: `${podcastData.id}-s${seasonNumber}-e${episode.episode}`,
+                episodeTitle: episode.title,
+                episodeDescription: episode.description,
+                episodeNumber: episode.episode,
+                seasonNumber: seasonNumber,
+                showTitle: podcastData.title,
+                showImage: podcastData.image,
+                dateAdded: new Date().toISOString()
+            };
+
+            const savedFavorites = localStorage.getItem('podcastFavorites');
+            let favorites = savedFavorites ? JSON.parse(savedFavorites) : [];
+
+            if (isFavorited) {
+                // Remove from favorites
+                favorites = favorites.filter(fav => fav.episodeId !== favoriteData.episodeId);
+            } else {
+                // Add to favorites
+                favorites.push(favoriteData);
+            }
+
+            localStorage.setItem('podcastFavorites', JSON.stringify(favorites));
+            setIsFavorited(!isFavorited);
         };
 
         return (
-            <div className="flex items-center justify-between p-4 bg-[#181818] rounded-lg hover:bg-[#282828] transition-colors mb-3">
-                <div className="flex items-center space-x-4 flex-1">
+            <div className="hover:bg-[#282828] bg-[#fff] flex items-center justify-between p-4 dark:bg-[#181818] rounded-lg dark:hover:bg-[#282828] transition-colors mb-3">
+                <div className="flex items-center space-x-4 flex-1 w-[50%]">
                     <img 
-                        src={selectedSeason?.image || podcastData?.image || Logo.image} 
+                        src={selectedSeason?.image || podcastData?.image || "/src/assets/SippiCup_logo.png"} 
                         alt="Episode cover" 
                         className="rounded-md w-12 h-12 object-cover"
                     />
                     <div className="flex-1 min-w-0">
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-1">
-                            <span className="font-medium text-white text-sm md:text-base truncate">
+                            <span className="font-medium text-white dark:text-[#000] text-sm md:text-base truncate">
                                 {episode.title}
                             </span>
-                            <span className="text-xs text-[#b3b3b3] md:ml-4">
+                            <span className="text-xs dark:text-[#b3b3b3] text-[#000] md:ml-4">
                                 Episode {episode.episode}
                             </span>
                         </div>
-                        <p className="text-xs text-[#b3b3b3] line-clamp-2">
+                        <p className="text-xs dark:text-[#b3b3b3] text-[#000] line-clamp-2">
                             {episode.description}
                         </p>
                     </div>
                 </div>
                 
-                <button
-                    onClick={handlePlayEpisode}
-                    className="ml-4 flex items-center space-x-2 bg-[#65350F] hover:bg-[#1ed760] text-white px-4 py-2 rounded-full text-sm font-medium transition-colors min-w-[120px] justify-center"
-                >
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                    </svg>
-                    <span>Listen Now</span>
-                </button>
+                <div className="flex items-center gap-4">
+                    {/* Favorite Button */}
+                    <button
+                        onClick={handleToggleFavorite}
+                        className={`p-2 rounded-full transition-colors ${
+                            isFavorited ? 'text-red-500' : 'text-gray-400 hover:text-red-400'
+                        }`}
+                        title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                    >
+                        <svg 
+                            className="w-5 h-5" 
+                            fill="currentColor" 
+                            viewBox="0 0 24 24"
+                        >
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                    </button>
+
+                    {/* Play Button */}
+                    <button
+                        onClick={handlePlayEpisode}
+                        className="flex items-center space-x-2 bg-[#65350F] hover:bg-[#1ed760] text-white px-4 py-2 rounded-full text-sm font-medium transition-colors min-w-[120px] justify-center"
+                    >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                        <span>Listen Now</span>
+                    </button>
+                </div>
             </div>
         );
     };
@@ -284,7 +349,6 @@ const PodcastDetail = () => {
                     </div>
                 )}
 
-                {/* Error state for seasons */}
                 {seasonsError && (
                     <div className="text-center py-8">
                         <div className="text-red-400">Error loading seasons: {seasonsError}</div>

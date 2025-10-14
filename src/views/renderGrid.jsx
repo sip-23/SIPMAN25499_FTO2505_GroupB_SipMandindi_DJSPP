@@ -15,7 +15,7 @@ import PodcastCard from '../components/podcastCard';
  *
  * @returns {JSX.Element} A responsive grid of podcast cards or a message if no podcasts are found.
  */
-const PodcastGrid = ({ podcasts, onPodcastSelect }) => {
+const PodcastGrid = ({ podcasts, isSidebarOpen = true }) => {
   if (!podcasts || podcasts.length === 0) {
     return (
       <div className="text-center py-10 text-gray-500">
@@ -25,12 +25,15 @@ const PodcastGrid = ({ podcasts, onPodcastSelect }) => {
   }
 
   return (
-    <div className="flex flex-col items-center w-[90%] md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mx-auto">
+    <div className={`grid grid-cols-1  ${
+      isSidebarOpen 
+        ? 'sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3' 
+        : 'sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'
+    } gap-6 w-full items-center`}>
       {podcasts.map(podcast => (
         <PodcastCard
           key={podcast.id}
           podcast={podcast}
-          onPodcastSelect={onPodcastSelect}
         />
       ))}
     </div>

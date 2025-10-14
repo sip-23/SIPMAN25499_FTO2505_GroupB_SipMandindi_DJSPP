@@ -78,11 +78,11 @@ const Header = ({ onSearch, searchTerm, onToggleSidebar }) => {
             const closedLock = document.getElementById('closed-lock');
             if (openLock && closedLock) {
                 if (newState) {
-                    openLock.classList.add('hidden');
-                    closedLock.classList.remove('hidden');
-                } else {
                     openLock.classList.remove('hidden');
                     closedLock.classList.add('hidden');
+                } else {
+                    openLock.classList.add('hidden');
+                    closedLock.classList.remove('hidden');
                 }
             }
             

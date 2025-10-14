@@ -3,7 +3,7 @@ import Header from "./Header";
 import PodcastGrid from "../views/renderGrid";
 import LoadingSpinner from "../utilities/loadingSpinner";
 import ErrorDisplay from "../utilities/loadingError";
-import useFetchPodcasts from "../utilities/fetchPodcasts";
+import { useFetchPodcasts } from "../utilities/fetchPodcasts";
 import GenreFilter from "../utilities/genreFilter";
 import Sorter from "../utilities/podcastSorter";
 import Pagination from "../utilities/pagination";
