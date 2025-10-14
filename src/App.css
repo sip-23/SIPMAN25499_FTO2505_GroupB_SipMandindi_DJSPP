@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: system-ui, Helvetica, Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #1a1a1a;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar * {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #652A0E;
+  border-radius: 6px;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;  
+    scrollbar-width: none;  
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none; 
+}
+
+/* Smooth transitions for sidebar */
+#sidebar {
+    transition: all 0.3s ease-in-out;
+    transform: translateX(0);
+}
+
+#sidebar.sidebar-hidden {
+    transform: translateX(-100%);
+    opacity: 0;
+}
+
+#sidebar.sidebar-visible {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* Ensure proper z-index stacking */
+#sidebar {
+    z-index: 40;
+}
+
+header {
+    z-index: 50;
+}
+
+/* Smooth transition for main content */
+.main-content {
+    transition: all 0.3s ease-in-out;
+}
+
+@media (max-width: 1023px) {
+    #sidebar {
+        max-width: 95vw;
+        margin: 1rem auto;
+    }
+}
+
+/* Ensure proper scrolling on mobile */
+#sidebar {
+    scrollbar-width: thin;
+    scrollbar-color: #652A0E transparent;
+}
