@@ -130,23 +130,23 @@ const Recommended = () => {
             {/* Mobile Sidebar Overlay */}
             {isMobileSidebarOpen && (
                 <div 
-                    className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+                    className="xl:relative sm:fixed inset-0 dark:bg-[#1a1a1a] bg-[#F4F4F4] bg-opacity-50 z-30 lg:hidden"
                     onClick={closeMobileSidebar}
                 />
             )}
 
             <div className="min-h-screen flex flex-col xl:flex-row">
                 {/* Sidebar -  */}
-                <div className={`${isMobileSidebarOpen ? 'fixed inset-0 flex items-center justify-center z-40' : 'hidden'} xl:block`}>
+                <div className={`${isMobileSidebarOpen ? 'sm:relative inset-0 flex items-center justify-center z-40' : 'hidden'}`}>
                     <Sidebar />
                 </div>
             
                 {/* Main Content */}
-                <div className={`main-content flex-1 w-full text-white bg-[#1a1a1a] p-4 lg:p-5 ${
-                    isSidebarOpen ? 'xl:border-l xl:border-[#333]' : ''
+                <div className={`flex-1 w-full dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6 ${
+                    isSidebarOpen ? 'xl:border-l xl:border-gray-300 xl:dark:border-[#333]' : ''
                 }`}>
                     <div className="w-full flex flex-col">
-                        <h1 className="text-3xl font-bold mb-6">Recommended For You</h1>
+                        <h1 className="text-3xl font-bold text-gray-600 dark:text-gray-400 mb-6">Recommended For You</h1>
 
                         
                         <div className="mb-4 p-2 bg-yellow-900 text-yellow-200 rounded text-sm">
@@ -161,7 +161,7 @@ const Recommended = () => {
                                         : "No recommendations yet. Start favoriting episodes to get personalized recommendations!"
                                     }
                                 </p>
-                                <p className="text-gray-500 text-sm">
+                                <p className="text-gray-600 dark:text-gray-400 text-sm">
                                     Recommendations are based on the genres of shows you've favorited.
                                 </p>
                             </div>

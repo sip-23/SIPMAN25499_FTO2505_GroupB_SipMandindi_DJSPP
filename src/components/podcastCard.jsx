@@ -103,7 +103,7 @@ const PodcastCard = ({ podcast }) => {
 
     return (
         <div 
-            className="podcast-card min-w-[280px] max-w-[285px] max-h-[350px] flex flex-col p-5 gap-1 rounded-lg bg-[#282828] hover:bg-[#65350F] transition-colors cursor-pointer"
+            className="podcast-card min-w-[280px] max-w-[285px] max-h-[350px] flex flex-col p-5 gap-1 rounded-lg hover:bg-[#b3b3b3] dark:hover:bg-[#65350F] dark:bg-[#282828] bg-white transition-colors cursor-pointer"
             onClick={handleClick}
         >
             <img 
@@ -113,7 +113,7 @@ const PodcastCard = ({ podcast }) => {
             />
 
             <div className="flex items-center justify-between">
-                <h3 className="title font-semibold text-white truncate">{podcast.title}</h3>
+                <h3 className="title font-semibold dark:text-white text-black truncate">{podcast.title}</h3>
                 <div className="flex items-center gap-1">
                     <button 
                         onClick={handleFavoriteClick}
@@ -166,7 +166,7 @@ const PodcastCard = ({ podcast }) => {
             <div className="mb-1">
                 <div className="flex flex-wrap gap-1">
                     {isLoadingGenres ? (
-                        <span className="genre-tag bg-[#F4F4F4] rounded-[2px] w-fit px-1 text-sm text-[#121212] truncate">
+                        <span className="genre-tag dark:bg-[#F4F4F4] bg-[#b3b3b3] rounded-[2px] w-fit px-1 text-sm dark:text-[#121212] text-[#ffffff] truncate">
                             Loading...
                         </span>
                     ) : (
@@ -180,14 +180,14 @@ const PodcastCard = ({ podcast }) => {
                         ))
                     )}
                     {!isLoadingGenres && genreTitles.length === 0 && (
-                        <span className="genre-tag bg-[#F4F4F4] rounded-[2px] w-fit px-1 text-sm text-[#121212] truncate">
+                        <span className="genre-tag dark:bg-[#F4F4F4] bg-[#b3b3b3] rounded-[2px] w-fit px-1 text-sm dark:text-[#121212] text-[#ffffff] truncate">
                             No genres
                         </span>
                     )}
                 </div>
             </div>
 
-            <p className="update-info text-sm text-[#b3b3b3] truncate">
+            <p className="update-info text-sm dark:text-[#b3b3b3] text-[#6D6D6D] truncate">
                 {getFormattedDate(podcast.updated)}
             </p>
         </div>

@@ -143,7 +143,7 @@ const Header = ({ onSearch, searchTerm, onToggleSidebar }) => {
     }, []);
 
     return (
-        <div className="top-0 left-0 right-0 bg-[#121212] w-full h-fit px-5 py-2 relative flex-1 flex items-center justify-between z-50 border-b border-[#333]">
+        <div className="top-0 left-0 right-0 bg-[#fff] dark:bg-[#121212] w-full h-fit px-5 py-2 relative flex-1 flex items-center justify-between z-50 border-b border-[#333]">
 
             <div className="flex items-center gap-4">
                 {/* Menu Toggle and Lock Icons */}
@@ -203,6 +203,13 @@ const Header = ({ onSearch, searchTerm, onToggleSidebar }) => {
                             alt="Dark mode logo"
                         />
                     )}
+                    {IMAGES.LOGO && (
+                        <img 
+                            className="flex w-[200px] h-12 md:w-[170px]" 
+                            src={IMAGES.LIGHTLOGO} 
+                            alt="light mode logo"
+                        />
+                    )}
                 </div>
             </div>
             
@@ -217,14 +224,14 @@ const Header = ({ onSearch, searchTerm, onToggleSidebar }) => {
                     value={searchValue}
                     onChange={handleSearchChange}
                     onKeyDown={handleKeyPress}
-                    className="border rounded-md opacity-30 bg-[#121212] w-full py-2 px-4 placeholder:text-[#b3b3b3] text-white hover:border-[#9A7B4F]" 
+                    className="border border-[#b3b3b3] rounded-[16px] dark:opacity-30 opacity-50 bg-transparent dark:bg-[#121212] w-full py-2 px-4 dark:placeholder:text-[#b3b3b3] placeholder:text-[#000000] hover:border-[#9A7B4F]" 
                 />
 
                 {/* Adding Clear search button */}
                 {searchValue && (
                     <button 
                         onClick={clearSearch}
-                        className="ml-2 text-[#b3b3b3] hover:text-white transition-colors"
+                        className="ml-2 text-[#b3b3b3] hover:text-black dark:hover:text-white transition-colors"
                         title="Clear search">
                         ×
                     </button>

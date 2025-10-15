@@ -202,7 +202,7 @@ const PodcastDetail = () => {
                     />
                     <div className="flex-1 min-w-0">
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-1">
-                            <span className="font-medium text-white dark:text-[#000] text-sm md:text-base truncate">
+                            <span className="font-medium dark:text-white text-[#000] text-sm md:text-base truncate">
                                 {episode.title}
                             </span>
                             <span className="text-xs dark:text-[#b3b3b3] text-[#000] md:ml-4">
@@ -265,8 +265,8 @@ const PodcastDetail = () => {
 
     if (!podcastData) {
         return (
-            <div className="min-h-screen bg-[#121212] flex items-center justify-center">
-                <div className="text-white text-lg text-center">
+            <div className="min-h-screen dark:bg-[#121212] bg-[#f4f4f4] flex items-center justify-center">
+                <div className="dark:text-[#fff] text-[#000] text-lg text-center">
                     <p>Podcast not found</p>
                     <button 
                         onClick={handleBackClick}
@@ -280,12 +280,12 @@ const PodcastDetail = () => {
     }
 
     return (
-        <div className="min-h-screen bg-[#121212] text-white">
+        <div className="min-h-screen dark:bg-[#121212] dark:text-[#fff] bg-[#f4f4f4] text-[#000]">
             {/* Back Button */}
             <div className="p-4 md:p-8">
                 <button 
                     onClick={handleBackClick}
-                    className="flex items-center space-x-2 text-[#b3b3b3] hover:text-white mb-6 transition-colors"
+                    className="flex items-center space-x-2 dark:text-[#b3b3b3] text-[#000] dark:hover:text-white hover:text-[#000] mb-6 transition-colors"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -307,16 +307,16 @@ const PodcastDetail = () => {
                     {/* Podcast Info */}
                     <div className="flex-1">
                         <h1 className="text-3xl md:text-4xl font-bold mb-4">{podcastData.title}</h1>
-                        <p className="text-gray-300 mb-6 leading-relaxed">{podcastData.description}</p>
+                        <p className="dark:text-gray-300 text-gray-700 mb-6 leading-relaxed">{podcastData.description}</p>
                         
                         {/* Genres */}
                         <div className="mb-6">
-                            <h3 className="text-sm font-medium text-gray-300 mb-2">Genres</h3>
+                            <h3 className="text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">Genres</h3>
                             <div className="flex flex-wrap gap-2">
                                 {podcastGenres.map((genre, index) => (
                                     <span
                                         key={index}
-                                        className="bg-[#F4F4F4] px-3 py-1 text-sm text-[#121212] rounded-full font-medium"
+                                        className="dark:bg-[#F4F4F4] bg-[#b3b3b3] w-fit h-fit px-1 text-sm dark:text-[#121212] text-[#ffffff] truncate"
                                     >
                                         {genre}
                                     </span>
@@ -328,7 +328,7 @@ const PodcastDetail = () => {
                         </div>
 
                         {/* Metadata */}
-                        <div className="grid grid-cols-2 gap-4 text-sm text-gray-300">
+                        <div className="grid grid-cols-2 gap-4 text-sm dark:text-gray-300 text-gray-700">
                             <div>
                                 <span className="font-medium">Seasons:</span> {currentSeasons.length || 0}
                             </div>
@@ -392,14 +392,14 @@ const PodcastDetail = () => {
                                         className="rounded-md w-16 h-16 md:w-20 md:h-20 object-cover"
                                     />
                                     <div className="flex-1">
-                                        <h4 className="text-lg md:text-xl font-medium text-white mb-2">
+                                        <h4 className="text-lg md:text-xl font-medium dark:text-white text-[#000] mb-2">
                                             {selectedSeason.title || `Season ${selectedSeason.season}`}
                                         </h4>
                                         <div className="flex items-center justify-between">
-                                            <span className="text-sm text-[#b3b3b3]">
+                                            <span className="text-sm dark:text-[#b3b3b3] text-[#6D6D6D]">
                                                 {selectedSeason.description || `Season ${selectedSeason.season} of ${podcastData.title}`}
                                             </span>
-                                            <span className="text-sm font-medium text-[#b3b3b3] ml-4">
+                                            <span className="text-sm font-medium dark:text-[#b3b3b3] text-[#6D6D6D] ml-4">
                                                 {selectedSeason.episodes?.length || 0} Episodes
                                             </span>
                                         </div>
@@ -408,7 +408,7 @@ const PodcastDetail = () => {
 
                                 {/* Episodes List */}
                                 <div className="mb-6">
-                                    <h5 className="text-lg font-medium text-white mb-4">Episodes</h5>
+                                    <h5 className="text-lg font-medium dark:text-white text-[#000] mb-4">Episodes</h5>
                                     {selectedSeason.episodes && selectedSeason.episodes.length > 0 ? (
                                         <div className="space-y-3">
                                             {selectedSeason.episodes.map((episode) => (
@@ -436,7 +436,7 @@ const PodcastDetail = () => {
                                     {currentSeasons.map((season) => (
                                         <div 
                                             key={season.season}
-                                            className={`p-4 bg-[#181818] rounded-lg cursor-pointer hover:bg-[#282828] transition-colors ${
+                                            className={`p-4 hover:bg-[#282828] bg-[#fff] dark:bg-[#181818] rounded-lg cursor-pointer dark:hover:bg-[#282828] transition-colors ${
                                                 selectedSeason?.season === season.season ? 'ring-2 ring-[#65350F]' : ''
                                             }`}
                                             onClick={() => setSelectedSeason(season)}
@@ -448,10 +448,10 @@ const PodcastDetail = () => {
                                                     className="rounded-md w-12 h-12 object-cover"
                                                 />
                                                 <div className="flex-1">
-                                                    <h6 className="font-medium text-white text-sm">
+                                                    <h6 className="font-medium dark:text-white text-[#000] text-sm">
                                                         {season.title || `Season ${season.season}`}
                                                     </h6>
-                                                    <p className="text-xs text-[#b3b3b3]">
+                                                    <p className="text-xs dark:text-[#b3b3b3] text-[#6D6D6D]">
                                                         {season.episodes?.length || 0} episodes
                                                     </p>
                                                 </div>

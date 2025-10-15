@@ -87,20 +87,20 @@ const Popular = () => {
             {/* Mobile Sidebar Overlay */}
             {isMobileSidebarOpen && (
                 <div 
-                    className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+                    className="xl:relative sm:fixed inset-0 dark:bg-[#1a1a1a] bg-[#F4F4F4] bg-opacity-50 z-30 lg:hidden"
                     onClick={closeMobileSidebar}
                 />
             )}
 
             <div className="min-h-screen flex flex-col xl:flex-row">
                 {/* Sidebar */}
-                <div className={`${isMobileSidebarOpen ? 'fixed inset-0 flex items-center justify-center z-40' : 'hidden'} xl:block`}>
+                <div className={`${isMobileSidebarOpen ? 'sm:relative inset-0 flex items-center justify-center z-40' : 'hidden'}`}>
                     <Sidebar />
                 </div>
             
                 {/* Main Content */}
-                <div className={`main-content flex-1 w-full text-white bg-[#1a1a1a] p-4 lg:p-5 ${
-                    isSidebarOpen ? 'xl:border-l xl:border-[#333]' : ''
+                <div className={`flex-1 w-full dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6 ${
+                    isSidebarOpen ? 'xl:border-l xl:border-gray-300 xl:dark:border-[#333]' : ''
                 }`}>
                     <div className="w-full flex flex-col">
                         <h1 className="text-3xl font-bold mb-6">Popular / Favorites</h1>
@@ -122,7 +122,7 @@ const Popular = () => {
                             <select 
                                 value={sortOrder}
                                 onChange={(e) => setSortOrder(e.target.value)}
-                                className="bg-[#282828] text-white px-3 py-2 rounded border border-[#333]"
+                                className="bg-white dark:bg-[#282828] text-black dark:text-white px-3 py-2 rounded border border-gray-300 dark:border-[#333] text-sm"
                             >
                                 <option value="desc">Newest First</option>
                                 <option value="asc">Oldest First</option>
