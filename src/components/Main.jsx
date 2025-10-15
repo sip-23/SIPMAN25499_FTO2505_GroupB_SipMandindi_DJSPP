@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Header from "./Header";
 import PodcastGrid from "../views/renderGrid";
 import LoadingSpinner from "../utilities/loadingSpinner";
@@ -154,15 +154,24 @@ const Home = () => {
 
     const closeMobileSidebar = () => {
         setIsMobileSidebarOpen(false);
+    };
+
+    // Use useEffect to sync DOM with state
+    useEffect(() => {
         const sidebar = document.getElementById('sidebar');
         if (sidebar) {
-            sidebar.classList.remove('sidebar-visible', 'block');
-            sidebar.classList.add('sidebar-hidden');
-            setTimeout(() => {
-                sidebar.classList.add('hidden');
-            }, 300);
+            if (isMobileSidebarOpen) {
+                sidebar.classList.remove('sidebar-hidden', 'hidden');
+                sidebar.classList.add('sidebar-visible', 'block');
+            } else {
+                sidebar.classList.remove('sidebar-visible', 'block');
+                sidebar.classList.add('sidebar-hidden');
+                setTimeout(() => {
+                    sidebar.classList.add('hidden');
+                }, 300);
+            }
         }
-    };
+    }, [isMobileSidebarOpen]);
 
     const handleSidebarToggle = (isOpen) => {
         if (isOpen) {

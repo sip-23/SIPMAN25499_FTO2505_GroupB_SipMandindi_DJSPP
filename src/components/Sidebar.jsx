@@ -1,52 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTheme } from "../utilities/ThemeContext";
 
 const Sidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [darkMode, setDarkMode] = useState(false);
+    const { darkMode, toggleTheme } = useTheme();
 
     // Theme toggle functionality
-    useEffect(() => {
-        const toggleSlider = document.getElementById('themeToggle');
-        const bod = document.body;
-
-        const initializeTheme = () => {
-            if (localStorage.getItem('darkMode') === 'enabled') {
-                bod.classList.add('dark');
-                setDarkMode(true);
-                if (toggleSlider) toggleSlider.checked = true;
-            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                bod.classList.add('dark');
-                setDarkMode(true);
-                if (toggleSlider) toggleSlider.checked = true;
-            }
-        };
-
-        const handleThemeToggle = () => {
-            if (toggleSlider.checked) {
-                bod.classList.add('dark');
-                localStorage.setItem('darkMode', 'enabled');
-                setDarkMode(true);
-            } else {
-                bod.classList.remove('dark');
-                localStorage.setItem('darkMode', 'disabled');
-                setDarkMode(false);
-            }
-        };
-
-        initializeTheme();
-        
-        if (toggleSlider) {
-            toggleSlider.addEventListener('change', handleThemeToggle);
-        }
-
-        return () => {
-            if (toggleSlider) {
-                toggleSlider.removeEventListener('change', handleThemeToggle);
-            }
-        };
-    }, []);
+    const handleThemeToggle = () => {
+        toggleTheme();
+    };
 
     const handleNavigation = (path) => {
         navigate(path);
@@ -167,10 +131,10 @@ const Sidebar = () => {
             <hr className="dark:border-[#b3b3b3] border-[#000000] my-7 opacity-30"/>
 
             {/* Control Panel */}
-            <div className="w-full flex flex-col gap-3 px-3 bg-white dark:bg-[#121212]">
+            <div className="w-full flex flex-col gap-3 px-3 ">
                 {/* Theme Toggle */}
                 <div className="flex items-center justify-center cursor-pointer w-full h-[48px] rounded-[6px] dark:bg-[#65350F] mt-4 mb-8 transition-colors bg-[#9D610E] hover:bg-[#683F06] dark:hover:bg-[#9A7B4F]">
-                    <svg className="ml-[70px]" xmlns="http://www.w3.org/2000/svg" width="19" height="19">
+                    <svg className=" sm:ml-[68px] ml-[70px]" xmlns="http://www.w3.org/2000/svg" width="19" height="19">
                         <text x="2" y="15" fontSize="14" fill="#828FA3">🌞</text>
                     </svg>
                     <label className="toggle relative inline-flex items-center w-[40px] h-[20px] shrink-0 cursor-pointer mx-auto">
@@ -178,7 +142,8 @@ const Sidebar = () => {
                             type="checkbox" 
                             id="themeToggle" 
                             className="absolute peer ml-2 sr-only" 
-                            defaultChecked={darkMode}
+                            checked={darkMode}
+                            onChange={handleThemeToggle}
                         />
                         <div className="slider absolute top-0 left-0 right-0 bottom-0 rounded-full bg-[#121212] transition-colors duration-300 ease-in-out peer-checked:bg-[#20212C]"></div>
                         <div className="absolute h-[14px] w-[14px] left-[3px] bottom-[3px] bg-white rounded-full transition-all duration-300 ease-in-out peer-checked:translate-x-[20px]"></div>

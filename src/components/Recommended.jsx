@@ -98,15 +98,25 @@ const Recommended = () => {
 
     const closeMobileSidebar = () => {
         setIsMobileSidebarOpen(false);
+    };
+
+    // Use useEffect to sync DOM with state
+    useEffect(() => {
         const sidebar = document.getElementById('sidebar');
         if (sidebar) {
-            sidebar.classList.remove('sidebar-visible', 'block');
-            sidebar.classList.add('sidebar-hidden');
-            setTimeout(() => {
-                sidebar.classList.add('hidden');
-            }, 300);
+            if (isMobileSidebarOpen) {
+                sidebar.classList.remove('sidebar-hidden', 'hidden');
+                sidebar.classList.add('sidebar-visible', 'block');
+            } else {
+                sidebar.classList.remove('sidebar-visible', 'block');
+                sidebar.classList.add('sidebar-hidden');
+                setTimeout(() => {
+                    sidebar.classList.add('hidden');
+                }, 300);
+            }
         }
-    };
+    }, [isMobileSidebarOpen]);
+
 
     const handlePodcastSelect = (podcast) => {
         // Handle podcast selection if needed
