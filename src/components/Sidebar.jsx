@@ -14,18 +14,16 @@ const Sidebar = () => {
 
     const handleNavigation = (path) => {
         navigate(path);
-        // Close sidebar on mobile after navigation
         if (window.innerWidth < 1024) {
-            const sidebar = document.getElementById('sidebar');
-            if (sidebar) {
-                sidebar.classList.remove('sidebar-visible', 'block');
-                sidebar.classList.add('sidebar-hidden');
-                setTimeout(() => {
-                    sidebar.classList.add('hidden');
-                }, 300);
-            }
         }
     };
+
+    const handleNavigateToPodcast = (episode, e) => {
+        e.stopPropagation();
+        const podcastId = episode.episodeId.split('-')[0];
+        navigate(`/podcast/${podcastId}`);
+    };
+
 
     const isActive = (path) => {
         return location.pathname === path;

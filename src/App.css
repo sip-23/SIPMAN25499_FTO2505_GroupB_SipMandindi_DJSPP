@@ -12,6 +12,17 @@ body {
   overflow-x: hidden;
 }
 
+body {
+  background-color: #E5E5E5;
+  color: #1a1a1a;
+}
+
+
+body.dark {
+  background-color: #1a1a1a;
+  color: #b3b3b3;
+}
+
 ::-webkit-scrollbar {
   width: 7px;
   height: 7px;
@@ -76,4 +87,31 @@ header {
 #sidebar {
     scrollbar-width: thin;
     scrollbar-color: #652A0E transparent;
+}
+
+@media (max-width: 1024px) {
+  .dark .main-content {
+    background-color: #1a1a1a !important;
+    color: white !important;
+  }
+  
+  .dark body {
+    background-color: #121212 !important;
+  }
+}
+
+/* Ensure proper transitions */
+.sidebar-visible {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.sidebar-hidden {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+/* Smooth transitions for sidebar */
+#sidebar {
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
 }

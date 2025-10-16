@@ -3,12 +3,20 @@ import Sidebar from "./Sidebar";
 import Header from "./Header";
 import RenderRow from "../views/RenderRows";
 import { useFetchPodcasts } from "../utilities/fetchPodcasts";
+import { useLayout } from "../layouts/LayoutContext.jsx";
 
 const Recommended = () => {
     const [recommendations, setRecommendations] = useState({});
     const [allPodcasts, setAllPodcasts] = useState([]);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    // Use layout context
+    const { 
+        isSidebarOpen, 
+        isMobileSidebarOpen, 
+        closeMobileSidebar,
+        openMobileSidebar 
+    } = useLayout();
 
     // Fetch all podcasts
     const { data: fetchedPodcasts } = useFetchPodcasts("https://podcast-api.netlify.app");
@@ -91,58 +99,31 @@ const Recommended = () => {
         console.log('Search term:', term);
     };
 
-    const handleSidebarToggle = (isOpen) => {
-        setIsSidebarOpen(isOpen);
-        setIsMobileSidebarOpen(isOpen);
-    };
-
-    const closeMobileSidebar = () => {
-        setIsMobileSidebarOpen(false);
-    };
-
-    // Use useEffect to sync DOM with state
-    useEffect(() => {
-        const sidebar = document.getElementById('sidebar');
-        if (sidebar) {
-            if (isMobileSidebarOpen) {
-                sidebar.classList.remove('sidebar-hidden', 'hidden');
-                sidebar.classList.add('sidebar-visible', 'block');
-            } else {
-                sidebar.classList.remove('sidebar-visible', 'block');
-                sidebar.classList.add('sidebar-hidden');
-                setTimeout(() => {
-                    sidebar.classList.add('hidden');
-                }, 300);
-            }
-        }
-    }, [isMobileSidebarOpen]);
-
-
     const handlePodcastSelect = (podcast) => {
-        // Handle podcast selection if needed
         console.log('Selected podcast:', podcast);
     };
 
+
     return (
         <>
-            <Header onSearch={handleSearch} onToggleSidebar={handleSidebarToggle} />
+            <Header onSearch={handleSearch} searchTerm={searchTerm}  />
 
             {/* Mobile Sidebar Overlay */}
             {isMobileSidebarOpen && (
                 <div 
-                    className="xl:relative sm:fixed inset-0 dark:bg-[#1a1a1a] bg-[#F4F4F4] bg-opacity-50 z-30 lg:hidden"
+                    className="xl:relative sm:fixed  dark:bg-[#1a1a1a] bg-[#F4F4F4] bg-opacity-50 z-30 lg:hidden"
                     onClick={closeMobileSidebar}
                 />
             )}
 
             <div className="min-h-screen flex flex-col xl:flex-row">
                 {/* Sidebar -  */}
-                <div className={`${isMobileSidebarOpen ? 'sm:relative inset-0 flex items-center justify-center z-40' : 'hidden'}`}>
+                <div className={`${isMobileSidebarOpen ? 'sm:absolute sm:inset-x-0  flex items-center justify-center z-40' : 'hidden'}`}>
                     <Sidebar />
                 </div>
             
                 {/* Main Content */}
-                <div className={`flex-1 w-full dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6 ${
+                <div className={`relative w-full dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6 ${
                     isSidebarOpen ? 'xl:border-l xl:border-gray-300 xl:dark:border-[#333]' : ''
                 }`}>
                     <div className="w-full flex flex-col">

@@ -256,8 +256,8 @@ const PodcastDetail = () => {
     const error = podcastsError || seasonsError;
 
     if (podcastsLoading) {
-    return <LoadingSpinner message="Loading Podcast Details..." />;
-}
+        return <LoadingSpinner message="Loading Podcast Details..." />;
+    }
 
     if (error) {
         return <ErrorDisplay message={`Failed to load podcast data: ${error}`} />;
@@ -343,7 +343,7 @@ const PodcastDetail = () => {
             {/* Seasons Section */}
             <div className="max-w-6xl mx-auto px-4 md:px-8">
                 {/* Loading state for seasons */}
-                {isLoadingSeasons && (
+                {/* {isLoadingSeasons && (
                     <div className="text-center py-8">
                         <LoadingSpinner message="Loading Selected Podcast Seasons and Episodes..." />
                     </div>
@@ -353,7 +353,7 @@ const PodcastDetail = () => {
                     <div className="text-center py-8">
                         <div className="text-red-400">Error loading seasons: {seasonsError}</div>
                     </div>
-                )}
+                )} */}
 
                 {/* Season Selector Header */}
                 {!isLoadingSeasons && currentSeasons.length > 0 && (
@@ -367,7 +367,7 @@ const PodcastDetail = () => {
                             <select 
                                 value={selectedSeason?.season || ""}
                                 onChange={handleSeasonChange}
-                                className="w-full md:w-64 px-3 py-2 border border-gray-600 bg-[#282828] text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#65350F] text-sm"
+                                className="w-full md:w-64 px-3 py-2 border bg-white dark:bg-[#282828] text-black dark:text-white px-3 py-2 rounded border border-gray-300 dark:border-[#333] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#65350F] text-sm"
                             >
                                 {currentSeasons.map((season) => (
                                     <option 
@@ -385,7 +385,7 @@ const PodcastDetail = () => {
                         {selectedSeason && (
                             <div className="mb-8">
                                 {/* Season Header */}
-                                <div className="flex items-start space-x-4 p-4 bg-[#181818] rounded-lg mb-6">
+                                <div className="flex items-start space-x-4 p-4 hover:bg-[#282828] bg-[#fff] items-center justify-between p-4 dark:bg-[#181818] rounded-lg dark:hover:bg-[#282828] rounded-lg mb-6">
                                     <img 
                                         src={selectedSeason.image || podcastData.image || IMAGES.LOGO} 
                                         alt={`Season ${selectedSeason.season} cover`} 
@@ -429,7 +429,7 @@ const PodcastDetail = () => {
                         )}
 
                         {/* All Seasons Overview */}
-                        {currentSeasons.length > 1 && (
+                        {/* {currentSeasons.length > 1 && (
                             <div className="mt-8">
                                 <h5 className="text-lg font-medium text-white mb-4">All Seasons</h5>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -460,7 +460,7 @@ const PodcastDetail = () => {
                                     ))}
                                 </div>
                             </div>
-                        )}
+                        )} */}
                     </>
                 )}
 

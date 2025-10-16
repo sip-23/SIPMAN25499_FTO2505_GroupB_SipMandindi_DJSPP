@@ -25,11 +25,11 @@ const PodcastGrid = ({ podcasts, isSidebarOpen = true }) => {
   }
 
   return (
-    <div className={`grid grid-cols-1  ${
+    <div className={`grid grid-cols-1 place-items-center place-content-center ${
       isSidebarOpen 
         ? 'sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3' 
-        : 'sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'
-    } gap-6 w-full items-center`}>
+        : 'sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+    } gap-6 `}>
       {podcasts.map(podcast => (
         <PodcastCard
           key={podcast.id}

@@ -1,19 +1,29 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
+import { useLayout } from "../layouts/LayoutContext.jsx";
 
 const Popular = () => {
     const [favorites, setFavorites] = useState([]);
     const [sortBy, setSortBy] = useState('dateAdded');
     const [sortOrder, setSortOrder] = useState('desc');
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const navigate = useNavigate();
+    
+    // Use layout context
+    const { 
+        isSidebarOpen, 
+        isMobileSidebarOpen, 
+        closeMobileSidebar,
+        openMobileSidebar 
+    } = useLayout();
 
     useEffect(() => {
         const savedFavorites = localStorage.getItem('podcastFavorites');
         if (savedFavorites) {
             const parsedFavorites = JSON.parse(savedFavorites);
-            console.log('Loaded favorites:', parsedFavorites); // Debug log
+            console.log('Loaded favorites:', parsedFavorites); 
             setFavorites(parsedFavorites);
         }
     }, []);
@@ -24,35 +34,23 @@ const Popular = () => {
         localStorage.setItem('podcastFavorites', JSON.stringify(updatedFavorites));
     };
 
+    const handleNavigateToPodcast = (favorite, e) => {
+        e.stopPropagation();
+        const podcastId = favorite.episodeId.split('-')[0];
+        navigate(`/podcast/${podcastId}`);
+    };
+
     const handleSearch = (term) => {
         console.log('Search term:', term);
     };
 
     const handleSidebarToggle = (isOpen) => {
-        setIsSidebarOpen(isOpen);
-        setIsMobileSidebarOpen(isOpen);
-    };
-
-    const closeMobileSidebar = () => {
-        setIsMobileSidebarOpen(false);
-    };
-
-    // Use useEffect to sync DOM with state
-    useEffect(() => {
-        const sidebar = document.getElementById('sidebar');
-        if (sidebar) {
-            if (isMobileSidebarOpen) {
-                sidebar.classList.remove('sidebar-hidden', 'hidden');
-                sidebar.classList.add('sidebar-visible', 'block');
-            } else {
-                sidebar.classList.remove('sidebar-visible', 'block');
-                sidebar.classList.add('sidebar-hidden');
-                setTimeout(() => {
-                    sidebar.classList.add('hidden');
-                }, 300);
-            }
+        if (isOpen) {
+            openMobileSidebar();
+        } else {
+            closeMobileSidebar();
         }
-    }, [isMobileSidebarOpen]);
+    };
 
 
     // Group favorites by show
@@ -82,19 +80,19 @@ const Popular = () => {
 
     return (
         <>
-            <Header onSearch={handleSearch} onToggleSidebar={handleSidebarToggle} />
+            <Header onSearch={handleSearch} searchTerm={searchTerm} />
 
             {/* Mobile Sidebar Overlay */}
             {isMobileSidebarOpen && (
                 <div 
-                    className="xl:relative sm:fixed inset-0 dark:bg-[#1a1a1a] bg-[#F4F4F4] bg-opacity-50 z-30 lg:hidden"
+                    className="xl:relative sm:fixed  dark:bg-[#1a1a1a] bg-[#F4F4F4] bg-opacity-50 z-30 lg:hidden"
                     onClick={closeMobileSidebar}
                 />
             )}
 
             <div className="min-h-screen flex flex-col xl:flex-row">
-                {/* Sidebar */}
-                <div className={`${isMobileSidebarOpen ? 'sm:relative inset-0 flex items-center justify-center z-40' : 'hidden'}`}>
+                {/* Sidebar -  */}
+                <div className={`${isMobileSidebarOpen ? 'sm:absolute sm:inset-x-0  flex items-center justify-center z-40' : 'hidden'}`}>
                     <Sidebar />
                 </div>
             
@@ -114,7 +112,7 @@ const Popular = () => {
                             <select 
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
-                                className="bg-[#282828] text-white px-3 py-2 rounded border border-[#333]"
+                                className="bg-white dark:bg-[#282828] text-black dark:text-white px-3 py-2 rounded border border-gray-300 dark:border-[#333] text-sm"
                             >
                                 <option value="dateAdded">Date Added</option>
                                 <option value="title">Episode Title</option>
@@ -140,27 +138,36 @@ const Popular = () => {
                             Object.keys(groupedFavorites).map(showTitle => (
                                 <div key={showTitle} className="mb-8">
                                     <h2 className="text-2xl font-bold mb-4">{showTitle}</h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    <div className="flex flex-col items-center gap-4 mb-4">
                                         {groupedFavorites[showTitle].map(favorite => (
-                                            <div key={favorite.episodeId} className="bg-[#282828] p-4 rounded-lg hover:bg-[#65350F] transition-colors">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <h3 className="font-semibold text-white">{favorite.episodeTitle}</h3>
-                                                    <button 
-                                                        onClick={() => removeFromFavorites(favorite.episodeId)}
-                                                        className="text-red-500 hover:text-red-400 transition-colors text-sm"
-                                                    >
-                                                        Remove
-                                                    </button>
+                                            <div key={favorite.episodeId} className="w-full hover:bg-[#282828] bg-[#fff] flex items-center  p-4 dark:bg-[#181818] rounded-lg dark:hover:bg-[#282828] transition-colors">
+                                                <div className="flex-shrink-0 relative w-[10%]">
+                                                    <img 
+                                                        src={favorite.showImage || "/src/assets/SippiCup_logo.png"} 
+                                                        alt={favorite.showTitle}
+                                                        className="w-[150px] h-[150px] rounded-md object-cover"
+                                                    />
                                                 </div>
-                                                <p className="text-gray-400 text-sm mb-2 line-clamp-2">
-                                                    {favorite.episodeDescription}
-                                                </p>
-                                                <p className="text-gray-400 text-sm mb-2">
-                                                    Season {favorite.seasonNumber}, Episode {favorite.episodeNumber}
-                                                </p>
-                                                <p className="text-gray-500 text-xs">
-                                                    Added: {new Date(favorite.dateAdded).toLocaleDateString()} at {new Date(favorite.dateAdded).toLocaleTimeString()}
-                                                </p>
+                                                <div className="flex flex-col p-4">
+                                                    <div className="flex justify-between items-start mb-2 flex-1 min-w-1">
+                                                        <h3 className="font-semibold text-black dark:text-white">{favorite.episodeTitle}</h3>
+                                                        <button 
+                                                            onClick={() => removeFromFavorites(favorite.episodeId)}
+                                                            className="text-red-500 hover:text-red-400 transition-colors text-sm"
+                                                        >
+                                                            Remove
+                                                        </button>
+                                                    </div>
+                                                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-2 line-clamp-2">
+                                                        {favorite.episodeDescription}
+                                                    </p>
+                                                    <p className="text-gray-400 text-sm mb-2">
+                                                        Season {favorite.seasonNumber}, Episode {favorite.episodeNumber}
+                                                    </p>
+                                                    <p className="text-gray-500 text-xs">
+                                                        Added: {new Date(favorite.dateAdded).toLocaleDateString()} at {new Date(favorite.dateAdded).toLocaleTimeString()}
+                                                    </p>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>

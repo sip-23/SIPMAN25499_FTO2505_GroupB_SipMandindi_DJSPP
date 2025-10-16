@@ -7,6 +7,7 @@ import { useFetchPodcasts } from "../utilities/fetchPodcasts";
 import GenreFilter from "../utilities/genreFilter";
 import Sorter from "../utilities/podcastSorter";
 import Pagination from "../utilities/pagination";
+import { useLayout } from "../layouts/LayoutContext.jsx";
 import Sidebar from "./Sidebar";
 
 /**
@@ -17,8 +18,13 @@ import Sidebar from "./Sidebar";
  */
 const Home = () => {
     const [podcastsUrl] = useState("https://podcast-api.netlify.app");
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+    
+    // Using layout context instead of of local state
+    const { 
+        isSidebarOpen, 
+        isMobileSidebarOpen, 
+        closeMobileSidebar 
+    } = useLayout();
 
     // Fetch all podcasts
     const { 
@@ -143,35 +149,7 @@ const Home = () => {
         setCurrentPage(1);
     };
 
-    const openMobileSidebar = () => {
-        setIsMobileSidebarOpen(true);
-        const sidebar = document.getElementById('sidebar');
-        if (sidebar) {
-            sidebar.classList.remove('sidebar-hidden', 'hidden');
-            sidebar.classList.add('sidebar-visible', 'block');
-        }
-    };
-
-    const closeMobileSidebar = () => {
-        setIsMobileSidebarOpen(false);
-    };
-
-    // Use useEffect to sync DOM with state
-    useEffect(() => {
-        const sidebar = document.getElementById('sidebar');
-        if (sidebar) {
-            if (isMobileSidebarOpen) {
-                sidebar.classList.remove('sidebar-hidden', 'hidden');
-                sidebar.classList.add('sidebar-visible', 'block');
-            } else {
-                sidebar.classList.remove('sidebar-visible', 'block');
-                sidebar.classList.add('sidebar-hidden');
-                setTimeout(() => {
-                    sidebar.classList.add('hidden');
-                }, 300);
-            }
-        }
-    }, [isMobileSidebarOpen]);
+    const { openMobileSidebar } = useLayout();
 
     const handleSidebarToggle = (isOpen) => {
         if (isOpen) {
@@ -181,34 +159,6 @@ const Home = () => {
         }
     };
 
-    const toggleSidebar = () => {
-        if (window.innerWidth < 1024) {
-            // Mobile behavior
-            if (isMobileSidebarOpen) {
-                closeMobileSidebar();
-            } else {
-                openMobileSidebar();
-            }
-        } else {
-            // Desktop behavior
-            const newState = !isSidebarOpen;
-            setIsSidebarOpen(newState);
-            
-            const sidebar = document.getElementById('sidebar');
-            if (sidebar) {
-                if (newState) {
-                    sidebar.classList.remove('sidebar-hidden', 'hidden');
-                    sidebar.classList.add('sidebar-visible', 'block');
-                } else {
-                    sidebar.classList.remove('sidebar-visible');
-                    sidebar.classList.add('sidebar-hidden');
-                    setTimeout(() => {
-                        sidebar.classList.add('hidden');
-                    }, 300);
-                }
-            }
-        }
-    };
 
     if (isLoading) {
         return <LoadingSpinner />;
@@ -224,7 +174,6 @@ const Home = () => {
             <Header 
                 onSearch={handleSearch} 
                 searchTerm={searchTerm} 
-                onToggleSidebar={toggleSidebar} 
             />
 
             {/* Mobile Sidebar Overlay */}
@@ -237,7 +186,7 @@ const Home = () => {
 
             <div className="min-h-screen flex flex-col lg:flex-row">
                 {/* Sidebar */}
-                <div className={`${isMobileSidebarOpen ? 'sm:relative inset-0 flex items-center justify-center z-40' : 'hidden'} lg:block`}>
+                <div className={`${isMobileSidebarOpen ? 'sm:relative inset-0 flex items-center justify-center z-40' : 'hidden'}`}>
                     <Sidebar />
                 </div>
             

@@ -1,6 +1,7 @@
 import { IoBookOutline, IoNotificationsOutline, IoSearchOutline, IoPersonOutline } from "react-icons/io5";
 import { useState, useEffect, useRef } from "react";
 import { IMAGES } from "../data/images";
+import { useLayout } from "../layouts/LayoutContext.jsx";
 
 /**
  * Header Component
@@ -8,11 +9,18 @@ import { IMAGES } from "../data/images";
  * A fixed top navigation bar
  * @component
  */
-const Header = ({ onSearch, searchTerm, onToggleSidebar }) => {
-    const [searchValue, setSearchValue] = useState(searchTerm || "");
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+const Header = ({ onSearch }) => {
+    const [searchValue, setSearchValue] = useState("");
     const searchTimeoutRef = useRef(null);
     const searchInputRef = useRef(null);
+
+    // Use layout context for sidebar state
+    const { 
+        isSidebarOpen, 
+        toggleSidebar,
+        closeMobileSidebar,
+        openMobileSidebar 
+    } = useLayout();
 
 
     const handleSearchChange = (e) => {
@@ -55,51 +63,15 @@ const Header = ({ onSearch, searchTerm, onToggleSidebar }) => {
         }
     };
 
-    const toggleSidebar = () => {
-        const sidebar = document.getElementById('sidebar');
-        const newState = !isSidebarOpen;
-        
-        if (sidebar) {
-            if (newState) {
-                sidebar.classList.remove('sidebar-hidden');
-                sidebar.classList.add('sidebar-visible', 'block');
-                sidebar.classList.remove('hidden');
-            } else {
-                sidebar.classList.remove('sidebar-visible');
-                sidebar.classList.add('sidebar-hidden');
-                // Add hidden class after transition
-                setTimeout(() => {
-                    sidebar.classList.add('hidden');
-                }, 300);
-            }
-            
-            // Update lock icons
-            const openLock = document.getElementById('open-lock');
-            const closedLock = document.getElementById('closed-lock');
-            if (openLock && closedLock) {
-                if (newState) {
-                    openLock.classList.remove('hidden');
-                    closedLock.classList.add('hidden');
-                } else {
-                    openLock.classList.add('hidden');
-                    closedLock.classList.remove('hidden');
-                }
-            }
-            
-            setIsSidebarOpen(newState);
-            
-            // Notify parent component about sidebar state change
-            if (onToggleSidebar) {
-                onToggleSidebar(newState);
-            }
+    const handleToggleSidebar = () => {
+        if (isSidebarOpen) {
+            closeMobileSidebar();
+        } else {
+            openMobileSidebar();
         }
     };
 
     useEffect(() => {
-        setSearchValue(searchTerm || "");
-    }, [searchTerm]);
-
-    useEffect(() => {
         return () => {
             if (searchTimeoutRef.current) {
                 clearTimeout(searchTimeoutRef.current);
@@ -108,39 +80,19 @@ const Header = ({ onSearch, searchTerm, onToggleSidebar }) => {
     }, []);
 
     useEffect(() => {
-        // Initialize sidebar state
-        const sidebar = document.getElementById('sidebar');
-        if (sidebar) {
-            const isCurrentlyOpen = !sidebar.classList.contains('hidden');
-            setIsSidebarOpen(isCurrentlyOpen);
-            
-            // Set initial classes for transition
-            if (isCurrentlyOpen) {
-                sidebar.classList.add('sidebar-visible');
+        const openLock = document.getElementById('open-lock');
+        const closedLock = document.getElementById('closed-lock');
+        
+        if (openLock && closedLock) {
+            if (isSidebarOpen) {
+                openLock.classList.remove('hidden');
+                closedLock.classList.add('hidden');
             } else {
-                sidebar.classList.add('sidebar-hidden');
-            }
-            
-            // Set initial lock state
-            const openLock = document.getElementById('open-lock');
-            const closedLock = document.getElementById('closed-lock');
-            if (openLock && closedLock) {
-                if (isCurrentlyOpen) {
-                    openLock.classList.add('hidden');
-                    closedLock.classList.remove('hidden');
-                } else {
-                    openLock.classList.remove('hidden');
-                    closedLock.classList.add('hidden');
-                }
+                openLock.classList.add('hidden');
+                closedLock.classList.remove('hidden');
             }
         }
-
-        return () => {
-            if (searchTimeoutRef.current) {
-                clearTimeout(searchTimeoutRef.current);
-            }
-        };
-    }, []);
+    }, [isSidebarOpen]);
 
     return (
         <div className="top-0 left-0 right-0 bg-[#fff] dark:bg-[#121212] w-full h-fit px-5 py-2 relative flex-1 flex items-center justify-between z-50 border-b border-[#333]">
@@ -156,7 +108,7 @@ const Header = ({ onSearch, searchTerm, onToggleSidebar }) => {
                         width="22" 
                         height="22" 
                         viewBox="0 0 56 56"
-                        onClick={toggleSidebar}
+                        onClick={handleToggleSidebar}
                     >
                         <path d="M 40.3163 3.2969 C 33.7070 3.2969 27.3320 7.8438 27.3320 17.5234 L 27.3320 24.9063 L 7.2460 24.9063 C 4.1288 24.9063 2.6757 26.3828 2.6757 29.7344 L 2.6757 47.8750 C 2.6757 51.2266 4.1288 52.7031 7.2460 52.7031 L 30.8242 52.7031 C 33.9413 52.7031 35.3944 51.2266 35.3944 47.8750 L 35.3944 29.7344 C 35.3944 26.5000 34.0351 25.0234 31.1054 24.9297 L 31.1054 17.0313 C 31.1054 10.3750 35.4179 6.8828 40.3163 6.8828 C 45.2382 6.8828 49.5505 10.3750 49.5505 17.0313 L 49.5505 22.4219 C 49.5505 24.0860 50.3708 24.7891 51.4489 24.7891 C 52.4804 24.7891 53.3243 24.1563 53.3243 22.4922 L 53.3243 17.5234 C 53.3243 7.8438 46.9259 3.2969 40.3163 3.2969 Z"/>
                     </svg>
@@ -171,7 +123,7 @@ const Header = ({ onSearch, searchTerm, onToggleSidebar }) => {
                         height="22" 
                         viewBox="0 0 94.666 94.666" 
                         xmlSpace="preserve"
-                        onClick={toggleSidebar}
+                        onClick={handleToggleSidebar}
                     >
                         <g>
                             <path d="M76.923,35.406h-3.128v-8.945C73.795,11.871,61.924,0,47.333,0S20.871,11.871,20.871,26.461v8.945h-3.128c-1.104,0-2,0.896-2,2v55.26c0,1.104,0.896,2,2,2h59.18c1.104,0,2-0.896,2-2v-55.26C78.923,36.302,78.028,35.406,76.923,35.406zM47.333,11.181c8.426,0,15.281,6.854,15.281,15.28v8.945H32.052v-8.945C32.052,18.036,38.907,11.181,47.333,11.181z"/>
@@ -182,7 +134,7 @@ const Header = ({ onSearch, searchTerm, onToggleSidebar }) => {
                     <button 
                         id="open-menu-btn" 
                         className="transition-colors hover:fill-[#b3b3b3] fill-[#000] dark:fill-[#b3b3b3]"
-                        onClick={toggleSidebar}
+                        onClick={handleToggleSidebar}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
                             <g>
@@ -205,7 +157,7 @@ const Header = ({ onSearch, searchTerm, onToggleSidebar }) => {
                     )}
                     {IMAGES.LOGO && (
                         <img 
-                            className="flex w-[200px] h-12 md:w-[170px]" 
+                            className="dark:hidden block lg:ml-[40px] w-[200px] h-12 md:w-[170px]" 
                             src={IMAGES.LIGHTLOGO} 
                             alt="light mode logo"
                         />
