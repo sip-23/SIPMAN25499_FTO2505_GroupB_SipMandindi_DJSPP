@@ -1,11 +1,20 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "../utilities/ThemeContext";
+import { useAudio } from '../utilities/AudioContext';
 
 const Sidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { darkMode, toggleTheme } = useTheme();
+    const { recentlyPlayed, playEpisode, currentEpisode, isPlaying, getEpisodeProgress } = useAudio();
+    const [topEpisodes, setTopEpisodes] = useState([]);
+
+    // Get top 3 recently played episodes
+    useEffect(() => {
+        const topThree = recentlyPlayed.slice(0, 3);
+        setTopEpisodes(topThree);
+    }, [recentlyPlayed]);
 
     // Theme toggle functionality
     const handleThemeToggle = () => {
@@ -18,6 +27,10 @@ const Sidebar = () => {
         }
     };
 
+    const handlePlayEpisode = (episode) => {
+        playEpisode(episode);
+    };
+
     const handleNavigateToPodcast = (episode, e) => {
         e.stopPropagation();
         const podcastId = episode.episodeId.split('-')[0];
@@ -27,6 +40,19 @@ const Sidebar = () => {
 
     const isActive = (path) => {
         return location.pathname === path;
+    };
+
+    const formatTime = (seconds) => {
+        if (!seconds) return '0:00';
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    };
+
+    const getProgressPercentage = (episodeId) => {
+        const progress = getEpisodeProgress(episodeId);
+        if (!progress || !progress.duration) return 0;
+        return (progress.currentTime / progress.duration) * 100;
     };
 
     return (
@@ -107,22 +133,128 @@ const Sidebar = () => {
 
             {/* Resume List */}
             <div className="w-full flex flex-col gap-3">
-                <div className="w-full flex items-center justify-between">
-                    <button className="flex items-center justify-between w-full h-[55px] gap-3 cursor-pointer rounded-full transition-colors dark:hover:bg-[#65350F] hover:bg-[#D9D9D9]">
-                        <div className="flex items-center gap-3 ml-6">
-                            <svg className="fill-[#000000] dark:fill-[#b3b3b3]" xmlns="http://www.w3.org/2000/svg" width="26px" height="26px" viewBox="0 0 32 32" id="Outlined">
-                                <g id="Fill">
-                                    <path d="M22,2H10A3,3,0,0,0,7,5V30.3l7.73-3.61a3,3,0,0,1,2.54,0L25,30.3V5A3,3,0,0,0,22,2Zm1,25.16-4.89-2.28a5,5,0,0,0-4.22,0L9,27.16V8H23ZM23,6H9V5a1,1,0,0,1,1-1H22a1,1,0,0,1,1,1Z"/>
-                                    <path d="M15,19.58A2,2,0,0,0,16.41,19l4.3-4.29-1.42-1.42L15,17.59l-2.29-2.3-1.42,1.42L13.59,19A2,2,0,0,0,15,19.58Z"/>
-                                </g>
-                            </svg>
-                            <span className="font-medium text-black dark:text-[#b3b3b3] text-[14.5px]">Resume Playlist</span>
-                        </div>
-                        <svg className="cursor-pointer mr-3 stroke-[#000000] dark:stroke-[#b3b3b3]" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 8V16M8 12H16M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                {/* Header */}
+                <button 
+                    onClick={() => handleNavigation('/resume-playlist')}
+                    className={`flex items-center justify-between w-full h-[55px] gap-3 cursor-pointer rounded-full transition-colors ${
+                        isActive('/resume-playlist') ? 'dark:bg-[#65350F] bg-[#D9D9D9]' : 'dark:hover:bg-[#65350F] hover:bg-[#D9D9D9]'
+                    }`}
+                >
+                    <div className="flex items-center gap-3 ml-6">
+                        <svg className="fill-[#000000] dark:fill-[#b3b3b3]" xmlns="http://www.w3.org/2000/svg" width="26px" height="26px" viewBox="0 0 32 32" id="Outlined">
+                            <g id="Fill">
+                                <path d="M22,2H10A3,3,0,0,0,7,5V30.3l7.73-3.61a3,3,0,0,1,2.54,0L25,30.3V5A3,3,0,0,0,22,2Zm1,25.16-4.89-2.28a5,5,0,0,0-4.22,0L9,27.16V8H23ZM23,6H9V5a1,1,0,0,1,1-1H22a1,1,0,0,1,1,1Z"/>
+                                <path d="M15,19.58A2,2,0,0,0,16.41,19l4.3-4.29-1.42-1.42L15,17.59l-2.29-2.3-1.42,1.42L13.59,19A2,2,0,0,0,15,19.58Z"/>
+                            </g>
                         </svg>
+                        <span className="font-medium text-black dark:text-[#b3b3b3] text-[14.5px]">Resume Playlist</span>
+                    </div>
+                    <svg className="cursor-pointer mr-3 stroke-[#000000] dark:stroke-[#b3b3b3]" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 8V16M8 12H16M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                </button>
+
+                {/* Top 3 Episodes */}
+                {topEpisodes.length === 0 ? (
+                    <div className="text-center py-4 px-2">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                            No recent episodes
+                        </p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                            Start listening to see your resume playlist
+                        </p>
+                    </div>
+                ) : (
+                    <div className="space-y-2 max-h-48 overflow-y-auto scrollbar-hide">
+                        {topEpisodes.map((episode, index) => {
+                            const isCurrentlyPlaying = currentEpisode?.episodeId === episode.episodeId && isPlaying;
+                            const progress = getEpisodeProgress(episode.episodeId);
+                            const progressPercentage = getProgressPercentage(episode.episodeId);
+                            
+                            return (
+                                <div 
+                                    key={`${episode.episodeId}-${index}`}
+                                    className="flex items-center gap-2 p-2 rounded-lg cursor-pointer dark:hover:bg-[#2a2a2a] hover:bg-[#f0f0f0] transition-colors group"
+                                    onClick={() => handlePlayEpisode(episode)}
+                                >
+                                    {/* Episode Image */}
+                                    <div className="relative flex-shrink-0">
+                                        <img 
+                                            src={episode.showImage || "/src/assets/SippiCup_logo.png"} 
+                                            alt={episode.showTitle}
+                                            className="w-8 h-8 rounded-md object-cover"
+                                        />
+                                        {isCurrentlyPlaying && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-md">
+                                                <div className="w-1.5 h-1.5 bg-[#1ed760] rounded-full animate-pulse"></div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Episode Info */}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-xs font-medium text-black dark:text-white truncate leading-tight">
+                                            {episode.title}
+                                        </p>
+                                        <p className="text-xs text-gray-600 dark:text-gray-400 truncate leading-tight">
+                                            {episode.showTitle}
+                                        </p>
+                                        
+                                        {/* Progress Bar */}
+                                        {progress && progress.duration && (
+                                            <div className="mt-1">
+                                                <div className="w-full bg-gray-300 dark:bg-gray-600 rounded-full h-1">
+                                                    <div 
+                                                        className="bg-[#9D610E] h-1 rounded-full transition-all duration-300"
+                                                        style={{ width: `${progressPercentage}%` }}
+                                                    />
+                                                </div>
+                                                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                    <span className="text-[10px]">
+                                                        {progress.completed ? 'Completed' : `${Math.round(progressPercentage)}%`}
+                                                    </span>
+                                                    <span className="text-[10px]">
+                                                        S{episode.season} E{episode.episode}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Play Button */}
+                                    <button 
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handlePlayEpisode(episode);
+                                        }}
+                                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full bg-[#65350F] hover:bg-[#1ed760] text-white flex-shrink-0"
+                                        title={isCurrentlyPlaying ? 'Pause' : 'Play'}
+                                    >
+                                        {isCurrentlyPlaying ? (
+                                            <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M6 4h4v16H6zM14 4h4v16h-4z"/>
+                                            </svg>
+                                        ) : (
+                                            <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M8 5v14l11-7z"/>
+                                            </svg>
+                                        )}
+                                    </button>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+
+                {/* View All Link (if more than 3 episodes) */}
+                {recentlyPlayed.length > 3 && (
+                    <button 
+                        onClick={() => handleNavigation('/resume-playlist')}
+                        className="w-full text-center mt-2 text-xs text-[#9D610E] hover:text-[#1ed760] transition-colors py-1"
+                    >
+                        View all {recentlyPlayed.length} episodes
                     </button>
-                </div>
+                )}
             </div>
 
             {/* Division line */}

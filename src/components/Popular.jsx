@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import { useLayout } from "../layouts/LayoutContext.jsx";
+import { useAudio } from "../utilities/AudioContext";
 
 const Popular = () => {
     const [favorites, setFavorites] = useState([]);
@@ -10,6 +11,8 @@ const Popular = () => {
     const [sortOrder, setSortOrder] = useState('desc');
     const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
+
+    const { playEpisode, currentEpisode, isPlaying, getEpisodeProgress } = useAudio();
     
     // Use layout context
     const { 
@@ -34,6 +37,19 @@ const Popular = () => {
         localStorage.setItem('podcastFavorites', JSON.stringify(updatedFavorites));
     };
 
+    const handlePlayEpisode = (favorite) => {
+        const episodeData = {
+            episodeId: favorite.episodeId,
+            audioUrl: favorite.audioUrl,
+            title: favorite.episodeTitle,
+            season: favorite.seasonNumber,
+            episode: favorite.episodeNumber,
+            showTitle: favorite.showTitle,
+            showImage: favorite.showImage
+        };
+        playEpisode(episodeData);
+    };
+
     const handleNavigateToPodcast = (favorite, e) => {
         e.stopPropagation();
         const podcastId = favorite.episodeId.split('-')[0];
@@ -50,6 +66,19 @@ const Popular = () => {
         } else {
             closeMobileSidebar();
         }
+    };
+
+    const formatTime = (seconds) => {
+        if (!seconds) return '0:00';
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    };
+
+    const getProgressPercentage = (episodeId) => {
+        const progress = getEpisodeProgress(episodeId);
+        if (!progress || !progress.duration) return 0;
+        return (progress.currentTime / progress.duration) * 100;
     };
 
 
@@ -100,79 +129,219 @@ const Popular = () => {
                 <div className={`flex-1 w-full dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6 ${
                     isSidebarOpen ? 'xl:border-l xl:border-gray-300 xl:dark:border-[#333]' : ''
                 }`}>
-                    <div className="w-full flex flex-col">
-                        <h1 className="text-3xl font-bold mb-6">Popular / Favorites</h1>
-                        
-                        <div className="mb-4 p-2 bg-yellow-900 text-yellow-200 rounded text-sm">
-                            Total favorites found: {favorites.length}
+                    <div className="max-w-6xl mx-auto">
+                        {/* Header Section */}
+                        <div className="mb-8">
+                            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                                <div>
+                                    <h1 className="text-3xl font-bold text-black dark:text-white mb-2">
+                                        Favorite Episodes
+                                    </h1>
+                                    <p className="text-gray-600 dark:text-gray-400">
+                                        Your collection of loved podcast episodes
+                                    </p>
+                                </div>
+                                
+                                {/* Sorting Controls */}
+                                <div className="flex gap-4 mt-4 md:mt-0">
+                                    <select 
+                                        value={sortBy}
+                                        onChange={(e) => setSortBy(e.target.value)}
+                                        className="bg-white dark:bg-[#282828] text-black dark:text-white px-3 py-2 rounded border border-gray-300 dark:border-[#333] text-sm"
+                                    >
+                                        <option value="dateAdded">Date Added</option>
+                                        <option value="title">Episode Title</option>
+                                    </select>
+                                    <select 
+                                        value={sortOrder}
+                                        onChange={(e) => setSortOrder(e.target.value)}
+                                        className="bg-white dark:bg-[#282828] text-black dark:text-white px-3 py-2 rounded border border-gray-300 dark:border-[#333] text-sm"
+                                    >
+                                        <option value="desc">Newest First</option>
+                                        <option value="asc">Oldest First</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Stats */}
+                            <div className="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
+                                <span>{favorites.length} episodes</span>
+                                <span>•</span>
+                                <span>
+                                    Added from {Object.keys(groupedFavorites).length} different shows
+                                </span>
+                            </div>
                         </div>
 
-                        {/* Sorting Controls */}
-                        <div className="flex gap-4 mb-6">
-                            <select 
-                                value={sortBy}
-                                onChange={(e) => setSortBy(e.target.value)}
-                                className="bg-white dark:bg-[#282828] text-black dark:text-white px-3 py-2 rounded border border-gray-300 dark:border-[#333] text-sm"
-                            >
-                                <option value="dateAdded">Date Added</option>
-                                <option value="title">Episode Title</option>
-                            </select>
-                            <select 
-                                value={sortOrder}
-                                onChange={(e) => setSortOrder(e.target.value)}
-                                className="bg-white dark:bg-[#282828] text-black dark:text-white px-3 py-2 rounded border border-gray-300 dark:border-[#333] text-sm"
-                            >
-                                <option value="desc">Newest First</option>
-                                <option value="asc">Oldest First</option>
-                            </select>
-                        </div>
-
+                        {/* Episodes List */}
                         {Object.keys(groupedFavorites).length === 0 ? (
-                            <div className="text-center py-8">
-                                <p className="text-gray-400 mb-4">No favorites yet. Start adding episodes to your favorites!</p>
-                                <p className="text-gray-500 text-sm">
-                                    Go to a podcast detail page and click the heart icon on episodes to add them to favorites.
+                            <div className="text-center py-16">
+                                <div className="w-24 h-24 mx-auto mb-4 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center">
+                                    <svg className="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                    </svg>
+                                </div>
+                                <h3 className="text-xl font-medium text-black dark:text-white mb-2">
+                                    No favorite episodes yet
+                                </h3>
+                                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                                    Start adding episodes to your favorites by clicking the heart icon
                                 </p>
+                                <button
+                                    onClick={() => navigate('/')}
+                                    className="px-6 py-3 bg-[#65350F] hover:bg-[#1ed760] text-white rounded-full transition-colors"
+                                >
+                                    Browse Podcasts
+                                </button>
                             </div>
                         ) : (
-                            Object.keys(groupedFavorites).map(showTitle => (
-                                <div key={showTitle} className="mb-8">
-                                    <h2 className="text-2xl font-bold mb-4">{showTitle}</h2>
-                                    <div className="flex flex-col items-center gap-4 mb-4">
-                                        {groupedFavorites[showTitle].map(favorite => (
-                                            <div key={favorite.episodeId} className="w-full hover:bg-[#282828] bg-[#fff] flex items-center  p-4 dark:bg-[#181818] rounded-lg dark:hover:bg-[#282828] transition-colors">
-                                                <div className="flex-shrink-0 relative w-[10%]">
-                                                    <img 
-                                                        src={favorite.showImage || "/src/assets/SippiCup_logo.png"} 
-                                                        alt={favorite.showTitle}
-                                                        className="w-[150px] h-[150px] rounded-md object-cover"
-                                                    />
-                                                </div>
-                                                <div className="flex flex-col p-4">
-                                                    <div className="flex justify-between items-start mb-2 flex-1 min-w-1">
-                                                        <h3 className="font-semibold text-black dark:text-white">{favorite.episodeTitle}</h3>
-                                                        <button 
-                                                            onClick={() => removeFromFavorites(favorite.episodeId)}
-                                                            className="text-red-500 hover:text-red-400 transition-colors text-sm"
-                                                        >
-                                                            Remove
-                                                        </button>
+                            <div className="space-y-8">
+                                {Object.keys(groupedFavorites).map(showTitle => (
+                                    <div key={showTitle} className="space-y-4">
+                                        {/* Show Header */}
+                                        <div className="flex items-center gap-4 mb-4">
+                                            <img 
+                                                src={groupedFavorites[showTitle][0]?.showImage || "/src/assets/SippiCup_logo.png"} 
+                                                alt={showTitle}
+                                                className="w-12 h-12 rounded-md object-cover"
+                                            />
+                                            <h2 className="text-2xl font-bold text-black dark:text-white">
+                                                {showTitle}
+                                            </h2>
+                                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                                                ({groupedFavorites[showTitle].length} episodes)
+                                            </span>
+                                        </div>
+
+                                        {/* Episodes for this show */}
+                                        {groupedFavorites[showTitle].map((favorite, index) => {
+                                            const isCurrentlyPlaying = currentEpisode?.episodeId === favorite.episodeId && isPlaying;
+                                            const progress = getEpisodeProgress(favorite.episodeId);
+                                            const progressPercentage = getProgressPercentage(favorite.episodeId);
+                                            
+                                            return (
+                                                <div 
+                                                    key={favorite.episodeId}
+                                                    className="flex items-center gap-4 p-4 rounded-lg bg-white dark:bg-[#181818] hover:bg-gray-50 dark:hover:bg-[#282828] transition-colors cursor-pointer group"
+                                                    onClick={() => handlePlayEpisode(favorite)}
+                                                >
+                                                    {/* Episode Number */}
+                                                    <div className="flex-shrink-0 w-8 text-center">
+                                                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                                                            {index + 1}
+                                                        </span>
                                                     </div>
-                                                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-2 line-clamp-2">
-                                                        {favorite.episodeDescription}
-                                                    </p>
-                                                    <p className="text-gray-400 text-sm mb-2">
-                                                        Season {favorite.seasonNumber}, Episode {favorite.episodeNumber}
-                                                    </p>
-                                                    <p className="text-gray-500 text-xs">
-                                                        Added: {new Date(favorite.dateAdded).toLocaleDateString()} at {new Date(favorite.dateAdded).toLocaleTimeString()}
-                                                    </p>
+
+                                                    {/* Episode Image */}
+                                                    <div className="flex-shrink-0 relative">
+                                                        <img 
+                                                            src={favorite.showImage || "/src/assets/SippiCup_logo.png"} 
+                                                            alt={favorite.showTitle}
+                                                            className="w-16 h-16 rounded-md object-cover"
+                                                        />
+                                                        {isCurrentlyPlaying && (
+                                                            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-md">
+                                                                <div className="w-3 h-3 bg-[#1ed760] rounded-full animate-pulse"></div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Episode Info */}
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-start justify-between mb-2">
+                                                            <div className="flex-1 min-w-0">
+                                                                <h3 className="font-medium text-black dark:text-white text-lg truncate">
+                                                                    {favorite.episodeTitle}
+                                                                    {isCurrentlyPlaying && (
+                                                                        <span className="ml-2 text-xs text-[#1ed760]">Playing</span>
+                                                                    )}
+                                                                </h3>
+                                                                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                                                                    Season {favorite.seasonNumber} Episode {favorite.episodeNumber}
+                                                                </p>
+                                                            </div>
+                                                            
+                                                            <div className="flex items-center gap-2 ml-4">
+                                                                <button 
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleNavigateToPodcast(favorite, e);
+                                                                    }}
+                                                                    className="px-3 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors opacity-0 group-hover:opacity-100"
+                                                                >
+                                                                    View Show
+                                                                </button>
+                                                                <button 
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        removeFromFavorites(favorite.episodeId);
+                                                                    }}
+                                                                    className="p-2 text-red-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                                                                    title="Remove from favorites"
+                                                                >
+                                                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                                                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        {/* Episode Description */}
+                                                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-2 line-clamp-2">
+                                                            {favorite.episodeDescription || 'No description available'}
+                                                        </p>
+                                                        
+                                                        {/* Date Added */}
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                                                            Added on {new Date(favorite.dateAdded).toLocaleDateString()} at {new Date(favorite.dateAdded).toLocaleTimeString()}
+                                                        </p>
+                                                        
+                                                        {/* Progress Bar */}
+                                                        {progress && progress.duration && (
+                                                            <div className="mt-2">
+                                                                <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                                                                    <span>
+                                                                        {progress.completed ? 'Completed' : `${Math.round(progressPercentage)}% played`}
+                                                                    </span>
+                                                                    <span>
+                                                                        {formatTime(progress.currentTime)} / {formatTime(progress.duration)}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                                                    <div 
+                                                                        className="bg-[#9D610E] h-2 rounded-full transition-all duration-300"
+                                                                        style={{ width: `${progressPercentage}%` }}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Play Button */}
+                                                    <button 
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handlePlayEpisode(favorite);
+                                                        }}
+                                                        className="flex-shrink-0 p-3 rounded-full bg-[#65350F] hover:bg-[#1ed760] text-white transition-colors"
+                                                        title={isCurrentlyPlaying ? 'Pause' : 'Play'}
+                                                    >
+                                                        {isCurrentlyPlaying ? (
+                                                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                                <path d="M6 4h4v16H6zM14 4h4v16h-4z"/>
+                                                            </svg>
+                                                        ) : (
+                                                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                                <path d="M8 5v14l11-7z"/>
+                                                            </svg>
+                                                        )}
+                                                    </button>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
-                                </div>
-                            ))
+                                ))}
+                            </div>
                         )}
                     </div>
                 </div>

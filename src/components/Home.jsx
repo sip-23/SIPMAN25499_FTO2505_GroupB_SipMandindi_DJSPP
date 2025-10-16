@@ -1,14 +1,14 @@
 import { useState, useMemo, useEffect } from "react";
-import Header from "./Header";
-import PodcastGrid from "../views/renderGrid";
-import LoadingSpinner from "../utilities/loadingSpinner";
-import ErrorDisplay from "../utilities/loadingError";
-import { useFetchPodcasts } from "../utilities/fetchPodcasts";
-import GenreFilter from "../utilities/genreFilter";
-import Sorter from "../utilities/podcastSorter";
-import Pagination from "../utilities/pagination";
+import Header from "./Header.jsx";
+import PodcastGrid from "../views/renderGrid.jsx";
+import LoadingSpinner from "../utilities/loadingSpinner.jsx";
+import ErrorDisplay from "../utilities/loadingError.jsx";
+import { useFetchPodcasts } from "../utilities/fetchPodcasts.jsx";
+import GenreFilter from "../utilities/genreFilter.jsx";
+import Sorter from "../utilities/podcastSorter.jsx";
+import Pagination from "../utilities/pagination.jsx";
 import { useLayout } from "../layouts/LayoutContext.jsx";
-import Sidebar from "./Sidebar";
+import Sidebar from "./Sidebar.jsx";
 
 /**
  * Home Component
