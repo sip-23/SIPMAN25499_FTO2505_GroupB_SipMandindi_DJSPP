@@ -188,7 +188,7 @@ const Home = () => {
                     ${isSidebarOpen ? 'mt-[560px] lg:ml-0 lg:mt-0' : ''} 
                     w-full
                 `}>
-                    <div className="w-full flex items-center flex-col gap-8">
+                    <div className="max-w-6xl mx-auto flex items-center flex-col gap-8">
                         {/* Welcome Section */}
                         <div className="mb-2">
                             <h1 className="text-4xl font-bold text-black dark:text-white mb-2">

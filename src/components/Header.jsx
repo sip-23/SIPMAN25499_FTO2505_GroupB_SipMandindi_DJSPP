@@ -2,6 +2,7 @@ import { IoBookOutline, IoNotificationsOutline, IoSearchOutline, IoPersonOutline
 import { useState, useEffect, useRef } from "react";
 import { IMAGES } from "../data/images";
 import { useLayout } from "../layouts/LayoutContext.jsx";
+import { useTheme } from "../utilities/ThemeContext";
 
 /**
  * Header Component
@@ -19,6 +20,8 @@ const Header = ({ onSearch , searchTerm }) => {
         isSidebarOpen, 
         toggleMobileSidebar
     } = useLayout();
+
+    const { darkMode } = useTheme();
 
     const handleToggleSidebar = () => {
         toggleMobileSidebar();
@@ -143,16 +146,16 @@ const Header = ({ onSearch , searchTerm }) => {
                 <div className="flex items-center">
                     {IMAGES.LOGO && (
                         <img 
-                            className="flex w-[200px] h-12 md:w-[170px]" 
+                            className={`w-[200px] h-12 md:w-[170px] ${darkMode ? 'block' : 'hidden'}`} 
                             src={IMAGES.DARKLOGO} 
                             alt="Dark mode logo"
                         />
                     )}
                     {IMAGES.LOGO && (
                         <img 
-                            className="dark:hidden block lg:ml-[40px] w-[200px] h-12 md:w-[170px]" 
+                            className={`w-[200px] h-12 md:w-[170px] ${darkMode ? 'hidden' : 'block'}`} 
                             src={IMAGES.LIGHTLOGO} 
-                            alt="light mode logo"
+                            alt="Light mode logo"
                         />
                     )}
                 </div>
