@@ -62,7 +62,7 @@ const Sidebar = () => {
                 <button 
                     onClick={() => handleNavigation('/favourites')}
                     className={`flex items-center w-full h-[55px] ml-[-40px] gap-3 cursor-pointer rounded-full transition-colors ${
-                        isActive('/popular') ? 'dark:bg-[#65350F] bg-[#9D610E]' : 'dark:hover:bg-[#65350F] hover:bg-[#D9D9D9]'
+                        isActive('/favourites') ? 'dark:bg-[#65350F] bg-[#9D610E]' : 'dark:hover:bg-[#65350F] hover:bg-[#D9D9D9]'
                     }`}
                 >
                     <div className="flex items-center gap-3 ml-12">

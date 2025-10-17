@@ -163,6 +163,8 @@ export const AudioProvider = ({ children }) => {
     
         setCurrentEpisode(newEpisode);
 
+        trackRecentlyPlayed(newEpisode);
+
         // Load and play new audio
         audioRef.current.src = audioUrl;
         audioRef.current.load();
@@ -184,6 +186,22 @@ export const AudioProvider = ({ children }) => {
             });
         }, 100);
     };
+
+    useEffect(() => {
+        const savedRecentlyPlayed = localStorage.getItem('recentlyPlayedEpisodes');
+        if (savedRecentlyPlayed) {
+            setRecentlyPlayed(JSON.parse(savedRecentlyPlayed));
+        }
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem('recentlyPlayedEpisodes', JSON.stringify(recentlyPlayed));
+    }, [recentlyPlayed]);
+
+    const clearRecentlyPlayed = () => {
+    setRecentlyPlayed([]);
+    localStorage.removeItem('recentlyPlayedEpisodes');
+};
 
     const togglePlayPause = () => {
         if (!currentEpisode) return;
@@ -274,6 +292,8 @@ export const AudioProvider = ({ children }) => {
         stopPlayback,
         resetHistory,
         getEpisodeProgress,
+        clearRecentlyPlayed,
+        trackRecentlyPlayed
     };
 
     return (

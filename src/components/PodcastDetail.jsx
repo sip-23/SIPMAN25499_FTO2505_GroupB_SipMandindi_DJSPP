@@ -157,7 +157,7 @@ const PodcastDetail = () => {
         const episodeProgress = getEpisodeProgress(`${podcastData.id}-s${seasonNumber}-e${episode.episode}`);
 
         useEffect(() => {
-            // Check if this episode is already favorited
+            // Checking if this episode is already favorited
             const savedFavorites = localStorage.getItem('podcastFavorites');
             if (savedFavorites) {
                 const favorites = JSON.parse(savedFavorites);

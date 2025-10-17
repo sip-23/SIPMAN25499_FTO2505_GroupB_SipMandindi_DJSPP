@@ -121,7 +121,7 @@ const Recommended = () => {
                 {/* Main Content */}
                 <div className={`
                     main-content flex-1 min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
-                    ${isSidebarOpen ? 'mt-[560px] lg:ml-0 lg:mt-0' : ''}
+                    ${isSidebarOpen ? 'mt-[500px] lg:ml-0 lg:mt-0' : ''}
                     w-full
                 `}>
                     <div className="max-w-6xl mx-auto">

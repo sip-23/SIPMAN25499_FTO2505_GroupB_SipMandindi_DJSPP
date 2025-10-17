@@ -36,6 +36,16 @@ const Favourites = () => {
     };
 
     const handlePlayEpisode = (favorite) => {
+        // Check if the favorite has a valid audio URL
+        if (!favorite.audioUrl) {
+            console.error('No audio URL found for favorite:', favorite);
+            alert('This episode does not have a valid audio file.');
+            return;
+        }
+
+        // Log the audio URL for debugging
+        console.log('Attempting to play audio URL:', favorite.audioUrl);
+
         const episodeData = {
             episodeId: favorite.episodeId,
             audioUrl: favorite.audioUrl,
@@ -45,6 +55,7 @@ const Favourites = () => {
             showTitle: favorite.showTitle,
             showImage: favorite.showImage
         };
+        
         playEpisode(episodeData);
     };
 
@@ -69,6 +80,17 @@ const Favourites = () => {
         const progress = getEpisodeProgress(episodeId);
         if (!progress || !progress.duration) return 0;
         return (progress.currentTime / progress.duration) * 100;
+    };
+
+    // Debug function to check favorite structure
+    const debugFavorite = (favorite) => {
+        console.log('Favorite structure:', {
+            episodeId: favorite.episodeId,
+            audioUrl: favorite.audioUrl,
+            episodeTitle: favorite.episodeTitle,
+            hasAudioUrl: !!favorite.audioUrl,
+            audioUrlType: typeof favorite.audioUrl
+        });
     };
 
     // Group favorites by show
@@ -113,7 +135,7 @@ const Favourites = () => {
                 {/* Main Content */}
                 <div className={`
                     main-content flex-1 min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
-                    ${isSidebarOpen ? 'mt-[560px] lg:ml-0 lg:mt-0' : ''}
+                    ${isSidebarOpen ? 'mt-[500px] lg:ml-0 lg:mt-0' : ''}
                     w-full
                 `}>
                     <div className="max-w-6xl mx-auto">
@@ -205,12 +227,15 @@ const Favourites = () => {
                                             const isCurrentlyPlaying = currentEpisode?.episodeId === favorite.episodeId && isPlaying;
                                             const progress = getEpisodeProgress(favorite.episodeId);
                                             const progressPercentage = getProgressPercentage(favorite.episodeId);
+                                            const hasAudio = !!favorite.audioUrl;
                                             
                                             return (
                                                 <div 
                                                     key={favorite.episodeId}
-                                                    className="flex items-center gap-4 p-4 rounded-lg bg-white dark:bg-[#181818] hover:ring-4 hover:ring-[#9D610E] dark:hover:bg-[#282828] transition-colors cursor-pointer group"
-                                                    onClick={() => handlePlayEpisode(favorite)}
+                                                    className={`flex items-center gap-4 p-4 rounded-lg bg-white dark:bg-[#181818] hover:ring-4 hover:ring-[#9D610E] dark:hover:bg-[#282828] transition-colors cursor-pointer group ${
+                                                        !hasAudio ? 'opacity-60' : ''
+                                                    }`}
+                                                    onClick={() => hasAudio && handlePlayEpisode(favorite)}
                                                 >
                                                     {/* Episode Number */}
                                                     <div className="flex-shrink-0 w-8 text-center">
@@ -231,6 +256,13 @@ const Favourites = () => {
                                                                 <div className="w-3 h-3 bg-[#1ed760] rounded-full animate-pulse"></div>
                                                             </div>
                                                         )}
+                                                        {!hasAudio && (
+                                                            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 rounded-md">
+                                                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                                </svg>
+                                                            </div>
+                                                        )}
                                                     </div>
 
                                                     {/* Episode Info */}
@@ -241,6 +273,9 @@ const Favourites = () => {
                                                                     {favorite.episodeTitle}
                                                                     {isCurrentlyPlaying && (
                                                                         <span className="ml-2 text-xs text-[#1ed760]">Playing</span>
+                                                                    )}
+                                                                    {!hasAudio && (
+                                                                        <span className="ml-2 text-xs text-red-500">No Audio</span>
                                                                     )}
                                                                 </h3>
                                                                 <p className="text-gray-600 dark:text-gray-400 text-sm">
@@ -308,10 +343,19 @@ const Favourites = () => {
                                                     <button 
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            handlePlayEpisode(favorite);
+                                                            if (hasAudio) {
+                                                                handlePlayEpisode(favorite);
+                                                            } else {
+                                                                alert('This episode does not have an audio file available.');
+                                                            }
                                                         }}
-                                                        className="flex-shrink-0 p-3 rounded-full bg-[#65350F] hover:bg-[#1ed760] text-white transition-colors"
-                                                        title={isCurrentlyPlaying ? 'Pause' : 'Play'}
+                                                        className={`flex-shrink-0 p-3 rounded-full transition-colors ${
+                                                            hasAudio 
+                                                                ? 'bg-[#65350F] hover:bg-[#1ed760] text-white' 
+                                                                : 'bg-gray-400 cursor-not-allowed text-gray-200'
+                                                        }`}
+                                                        title={hasAudio ? (isCurrentlyPlaying ? 'Pause' : 'Play') : 'No audio available'}
+                                                        disabled={!hasAudio}
                                                     >
                                                         {isCurrentlyPlaying ? (
                                                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
