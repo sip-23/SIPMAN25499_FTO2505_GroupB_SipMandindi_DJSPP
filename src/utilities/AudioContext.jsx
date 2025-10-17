@@ -138,7 +138,7 @@ export const AudioProvider = ({ children }) => {
         [episodeId]: {
             currentTime: time,
             duration: duration,
-            completed: completed || (time >= duration * 0.95), // 95% considered completed
+            completed: completed || (time >= duration * 0.95), // 95% to be considered completed
             lastListened: new Date().toISOString()
         }
         }));
@@ -162,9 +162,6 @@ export const AudioProvider = ({ children }) => {
         };
     
         setCurrentEpisode(newEpisode);
-
-        // Track in recently played
-        trackRecentlyPlayed(newEpisode);
 
         // Load and play new audio
         audioRef.current.src = audioUrl;
@@ -253,11 +250,6 @@ export const AudioProvider = ({ children }) => {
         return playbackHistory[episodeId] || null;
     };
 
-    const clearRecentlyPlayed = () => {
-        setRecentlyPlayed([]);
-        localStorage.removeItem('recentlyPlayedEpisodes');
-    };
-
     const value = {
         // State
         currentEpisode,
@@ -282,8 +274,6 @@ export const AudioProvider = ({ children }) => {
         stopPlayback,
         resetHistory,
         getEpisodeProgress,
-        clearRecentlyPlayed,
-        trackRecentlyPlayed
     };
 
     return (

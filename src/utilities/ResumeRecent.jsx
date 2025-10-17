@@ -6,13 +6,6 @@ import { useAudio } from '../utilities/AudioContext';
 const ResumePlaylist = () => {
     const navigate = useNavigate();
     const { recentlyPlayed, playEpisode, currentEpisode, isPlaying } = useAudio();
-    const [topEpisodes, setTopEpisodes] = useState([]);
-
-    // Get top 3 recently played episodes
-    useEffect(() => {
-        const topThree = recentlyPlayed.slice(0, 3);
-        setTopEpisodes(topThree);
-    }, [recentlyPlayed]);
 
     const handlePlayEpisode = (episode) => {
         playEpisode(episode);
@@ -26,13 +19,6 @@ const ResumePlaylist = () => {
         // Extract podcast ID from episodeId (format: "podcastId-sX-eX")
         const podcastId = episode.episodeId.split('-')[0];
         navigate(`/podcast/${podcastId}`);
-    };
-
-    const formatTime = (seconds) => {
-        if (!seconds) return '0:00';
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     };
 
     const getEpisodeProgress = (episodeId) => {
@@ -102,7 +88,7 @@ const ResumePlaylist = () => {
 
             {/* Episode List */}
             <div className="space-y-3 max-h-60 overflow-y-auto scrollbar-hide">
-                {topEpisodes.map((episode, index) => {
+                {recentlyPlayed.map((episode, index) => {
                     const isCurrentlyPlaying = currentEpisode?.episodeId === episode.episodeId && isPlaying;
                     const progress = getEpisodeProgress(episode.episodeId);
                     const progressPercentage = getProgressPercentage(episode.episodeId);
