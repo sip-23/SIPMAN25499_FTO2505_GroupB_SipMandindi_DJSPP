@@ -58,26 +58,26 @@ const Sidebar = () => {
     return (
         <aside 
             id="sidebar"
-            className="sidebar-visible fixed lg:relative inset-0 lg:inset-auto mx-auto sm:my-4 md:my-4 lg:my-0 
-                       w-[90vw] sm:w-[400px] md:w-[450px] lg:w-[350px] 
-                       h-fit max-h-[85vh] lg:h-full 
+            className="sidebar-visible absolute lg:relative inset-0 lg:inset-auto mx-auto  sm:my-4 md:my-4 lg:my-0 
+                       w-[90vw] sm:w-[300px] md:w-[350px] lg:w-[350px] lg:h-full
+                       h-fit 
                        dark:bg-[#121212] bg-[#ffffff] 
                        p-5 z-40 
                        border border-gray-300 dark:border-[#333] 
                        transition-all duration-300 ease-in-out 
                        rounded-b-[4px] lg:rounded-b-none
-                       shadow-xl lg:shadow-none
+                       shadow-m lg:shadow-none
                        overflow-y-auto"
         >
             <div className="w-full flex flex-col">
                 {/* Home */}
                 <button 
                     onClick={() => handleNavigation('/')}
-                    className={`flex items-center w-full h-[55px] gap-3 cursor-pointer rounded-full transition-colors ${
-                        isActive('/') ? 'dark:bg-[#65350F] bg-[#D9D9D9]' : 'dark:hover:bg-[#65350F] hover:bg-[#D9D9D9]'
+                    className={`flex items-center w-full h-[55px] ml-[-40px] gap-3 cursor-pointer rounded-full transition-colors ${
+                        isActive('/') ? 'dark:bg-[#65350F] bg-[#9D610E]' : 'dark:hover:bg-[#65350F] hover:bg-[#D9D9D9]'
                     }`}
                 >
-                    <div className="flex items-center gap-3 ml-6">
+                    <div className="flex items-center gap-3 ml-12">
                         <svg className="fill-[#000000] dark:fill-[#b3b3b3]" xmlns="http://www.w3.org/2000/svg" width="22px" height="22px" viewBox="0 0 32 32" version="1.1">
                             <title>house</title>
                             <path d="M0 16h4l12-13.696 12 13.696h4l-13.984-16h-4zM4 32h8v-9.984q0-0.832 0.576-1.408t1.44-0.608h4q0.8 0 1.408 0.608t0.576 1.408v9.984h8v-13.408l-12-13.248-12 13.248v13.408zM26.016 6.112l4 4.576v-8.672h-4v4.096z"/>
@@ -86,14 +86,14 @@ const Sidebar = () => {
                     </div>
                 </button>
 
-                {/* Popular */}
+                {/* favourites */}
                 <button 
-                    onClick={() => handleNavigation('/popular')}
-                    className={`flex items-center w-full h-[55px] gap-3 cursor-pointer rounded-full transition-colors ${
-                        isActive('/popular') ? 'dark:bg-[#65350F] bg-[#D9D9D9]' : 'dark:hover:bg-[#65350F] hover:bg-[#D9D9D9]'
+                    onClick={() => handleNavigation('/favourites')}
+                    className={`flex items-center w-full h-[55px] ml-[-40px] gap-3 cursor-pointer rounded-full transition-colors ${
+                        isActive('/popular') ? 'dark:bg-[#65350F] bg-[#9D610E]' : 'dark:hover:bg-[#65350F] hover:bg-[#D9D9D9]'
                     }`}
                 >
-                    <div className="flex items-center gap-3 ml-6">
+                    <div className="flex items-center gap-3 ml-12">
                         <svg className="fill-[#000000] dark:fill-[#b3b3b3]" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" width="22px" height="22px" viewBox="0 -2.5 21 21" version="1.1">
                             <title>love [#1489]</title>
                             <g id="Page-1" stroke="none" strokeWidth="1" fillRule="evenodd">
@@ -104,18 +104,18 @@ const Sidebar = () => {
                                 </g>
                             </g>
                         </svg>
-                        <span className="font-medium text-black dark:text-[#b3b3b3] text-[14.5px]">Popular</span>
+                        <span className="font-medium text-black dark:text-[#b3b3b3] text-[14.5px]">Favourites</span>
                     </div>
                 </button>
 
                 {/* Recommended */}
                 <button 
                     onClick={() => handleNavigation('/recommended')}
-                    className={`flex items-center w-full h-[55px] gap-3 cursor-pointer rounded-full transition-colors ${
-                        isActive('/recommended') ? 'dark:bg-[#65350F] bg-[#D9D9D9]' : 'dark:hover:bg-[#65350F] hover:bg-[#D9D9D9]'
+                    className={`flex items-center w-full h-[55px] ml-[-40px] gap-3 cursor-pointer rounded-full transition-colors ${
+                        isActive('/recommended') ? 'dark:bg-[#65350F] bg-[#9D610E]' : 'dark:hover:bg-[#65350F] hover:bg-[#D9D9D9]'
                     }`}
                 >
-                    <div className="flex items-center gap-3 ml-5">
+                    <div className="flex items-center gap-3 ml-12">
                         <svg className="stroke-[#000000] dark:stroke-[#b3b3b3] fill-[#000000] dark:fill-[#b3b3b3]" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" width="26px" height="26px" viewBox="0 0 24 24" version="1.1">
                             <g id="🔍-Product-Icons" strokeWidth="1" fillRule="evenodd">
                                 <g id="ic_fluent_recommended_24_regular" fillRule="nonzero">
@@ -136,11 +136,11 @@ const Sidebar = () => {
                 {/* Header */}
                 <button 
                     onClick={() => handleNavigation('/resume-playlist')}
-                    className={`flex items-center justify-between w-full h-[55px] gap-3 cursor-pointer rounded-full transition-colors ${
-                        isActive('/resume-playlist') ? 'dark:bg-[#65350F] bg-[#D9D9D9]' : 'dark:hover:bg-[#65350F] hover:bg-[#D9D9D9]'
+                    className={`flex items-center justify-between w-full h-[55px] ml-[-40px] gap-3 cursor-pointer rounded-full transition-colors ${
+                        isActive('/resume-playlist') ? 'dark:bg-[#65350F] bg-[#9D610E]' : 'dark:hover:bg-[#65350F] hover:bg-[#D9D9D9]'
                     }`}
                 >
-                    <div className="flex items-center gap-3 ml-6">
+                    <div className="flex items-center gap-3 ml-12">
                         <svg className="fill-[#000000] dark:fill-[#b3b3b3]" xmlns="http://www.w3.org/2000/svg" width="26px" height="26px" viewBox="0 0 32 32" id="Outlined">
                             <g id="Fill">
                                 <path d="M22,2H10A3,3,0,0,0,7,5V30.3l7.73-3.61a3,3,0,0,1,2.54,0L25,30.3V5A3,3,0,0,0,22,2Zm1,25.16-4.89-2.28a5,5,0,0,0-4.22,0L9,27.16V8H23ZM23,6H9V5a1,1,0,0,1,1-1H22a1,1,0,0,1,1,1Z"/>

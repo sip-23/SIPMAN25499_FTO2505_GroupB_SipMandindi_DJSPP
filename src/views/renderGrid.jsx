@@ -29,7 +29,7 @@ const PodcastGrid = ({ podcasts, isSidebarOpen = true }) => {
       isSidebarOpen 
         ? 'sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3' 
         : 'sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-    } gap-6 `}>
+    } gap-6 transition-all duration-200 ml-2 transform hover:scale-105 `}>
       {podcasts.map(podcast => (
         <PodcastCard
           key={podcast.id}

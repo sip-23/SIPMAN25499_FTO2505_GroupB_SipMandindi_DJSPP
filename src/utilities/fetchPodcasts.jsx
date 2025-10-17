@@ -29,6 +29,7 @@ export const useFetchPodcasts = (apiUrl) => {
                 
                 const podcasts = await response.json();
                 
+                // Validate that we got an array
                 if (!Array.isArray(podcasts)) {
                     throw new Error('Invalid data format received from API');
                 }

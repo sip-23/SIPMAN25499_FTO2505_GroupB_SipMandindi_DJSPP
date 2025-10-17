@@ -53,7 +53,7 @@ const GenreFilter = ({ onGenreChange }) => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-start gap-3 mb-6 mt-6">
-                <h4 className="font-medium text-[#fff] text-[15px]">Filter by:</h4>
+                <h4 className="font-medium dark:text-white text-[#000] text-[15px]">Filter by:</h4>
                 <div className="flex items-center relative">
                     <select 
                         disabled
@@ -69,7 +69,7 @@ const GenreFilter = ({ onGenreChange }) => {
     if (error) {
         return (
             <div className="flex items-center justify-start gap-3 mb-6 mt-6">
-                <h4 className="font-medium text-[#fff] text-[15px]">Filter by:</h4>
+                <h4 className="font-medium dark:text-white text-[#000] text-[15px]">Filter by:</h4>
                 <div className="flex items-center relative">
                     <select 
                         disabled
@@ -84,7 +84,7 @@ const GenreFilter = ({ onGenreChange }) => {
 
     return (
         <div className="flex items-center justify-start gap-3 mb-6 mt-6">
-            <h4 className="font-medium text-[#fff] text-[15px]">Filter by:</h4>
+            <h4 className="font-medium dark:text-white text-[#000] text-[15px]">Filter by:</h4>
             <div className="flex items-center relative">
                 <select 
                     id="genre-filter"
@@ -92,7 +92,7 @@ const GenreFilter = ({ onGenreChange }) => {
                     onChange={handleGenreChange}
                     className="w-full px-2 py-2 font-plus-jakarta-sans border text-[13px] font-medium border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-600 text-[#000112] [&>option:checked]:text-black"
                 >
-                    <option value="all" className="bg-white text-[13px] font-medium text-gray-400 hover:bg-gray-900">
+                    <option value="all" className="dark:text-white text-[#000] text-[13px] font-medium text-gray-400 hover:bg-gray-900">
                         All Genres
                     </option>
                     {genres.map(genre => (

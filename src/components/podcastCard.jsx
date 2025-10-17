@@ -13,6 +13,7 @@ const PodcastCard = ({ podcast }) => {
 
     // Fetch genre data from API endpoint: https://podcast-api.netlify.app/genre/{ID}
     const fetchGenreData = async (genreId) => {
+        for (let i = 0; i < retries; i++) {
         try {
             const response = await fetch(`https://podcast-api.netlify.app/genre/${genreId}`);
             if (!response.ok) {
@@ -21,9 +22,16 @@ const PodcastCard = ({ podcast }) => {
             const genreData = await response.json();
             return genreData;
         } catch (err) {
-            console.error(`Error fetching genre ${genreId}:`, err);
-            return null;
+            console.warn(`Attempt ${i + 1} failed for genre ${genreId}:`, err);
+                if (i === retries - 1) {
+                    console.error(`All attempts failed for genre ${genreId}`);
+                    return null;
+                }
+                // Wait before retrying (exponential backoff)
+                await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+            }
         }
+        return null;
     };
 
     // Fetch all genres for this podcast
@@ -66,6 +74,7 @@ const PodcastCard = ({ podcast }) => {
         setIsFavorited(userFavorites.includes(podcast.id));
     }, [podcast.id, podcast.genres]);
 
+
     const getFormattedDate = (dateString) => {
         const updatedDate = new Date(dateString);
         return updatedDate.toLocaleDateString('en-US', {
@@ -93,17 +102,23 @@ const PodcastCard = ({ podcast }) => {
         // Update user favorites
         const userFavorites = JSON.parse(localStorage.getItem('userFavorites') || '[]');
         if (isFavorited) {
-            const updatedFavorites = userFavorites.filter(id => id !== podcast.id);
+            const updatedFavorites = userFavorites.filter(fav => fav.podcastId !== podcast.id);
             localStorage.setItem('userFavorites', JSON.stringify(updatedFavorites));
         } else {
-            userFavorites.push(podcast.id);
+            const favoriteData = {
+                podcastId: podcast.id,
+                podcastTitle: podcast.title,
+                podcastImage: podcast.image,
+                dateAdded: new Date().toISOString()
+            };
+            userFavorites.push(favoriteData);
             localStorage.setItem('userFavorites', JSON.stringify(userFavorites));
         }
     };
 
     return (
         <div 
-            className="podcast-card min-w-[280px] max-w-[285px] max-h-[350px] flex flex-col p-5 gap-1 rounded-lg hover:bg-[#b3b3b3] dark:hover:bg-[#65350F] dark:bg-[#282828] bg-white transition-colors cursor-pointer"
+            className="podcast-card min-w-[280px] max-w-[285px] max-h-[350px] flex flex-col p-5 gap-1 rounded-lg hover:ring-[#9D610E] hover:ring-4 dark:hover:bg-[#65350F] dark:bg-[#282828] bg-white transition-colors cursor-pointer"
             onClick={handleClick}
         >
             <img 
@@ -129,7 +144,7 @@ const PodcastCard = ({ podcast }) => {
                             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                         </svg>
                     </button>
-                    <span className="font-medium text-white text-[13px]">{favoritesCount}</span>  
+                    <span className="font-medium dark:text-white text-black text-[13px]">{favoritesCount}</span>  
                 </div>
             </div>
 

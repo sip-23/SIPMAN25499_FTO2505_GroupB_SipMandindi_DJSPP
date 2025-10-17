@@ -14,7 +14,7 @@ const Sorter = ({ onSortChange }) => {
         { value: 'oldest', label: 'Oldest: GrandPa & GrandMa' },
         { value: 'title-az', label: 'A - Z: Alphabetical order' },
         { value: 'title-za', label: 'Z - A: Alphabetical order' },
-        { value: 'seasons', label: '# Seasons: Number of seasons' }
+        { value: 'seasons', label: '# Seasons: Podcast with most seasons' }
     ];
 
     // Handle sort order change
@@ -26,7 +26,7 @@ const Sorter = ({ onSortChange }) => {
 
     return (
         <div className="flex items-center justify-start gap-3 mb-6 mt-6">
-            <h4 className="font-medium text-[#fff] text-[15px]">Sort by:</h4>
+            <h4 className="font-medium dark:text-white text-[#000] text-[15px]">Sort by:</h4>
             <div className="flex items-center relative">
                 <select 
                     id="podcast-sorter"

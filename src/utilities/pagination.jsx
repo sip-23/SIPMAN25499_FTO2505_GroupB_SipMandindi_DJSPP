@@ -42,7 +42,7 @@ const Pagination = ({
     return (
         <div className="flex flex-col items-center justify-between gap-4 mt-8 sm:flex-row">
             {/* Results info */}
-            <div className="text-[#b3b3b3] text-sm">
+            <div className="dark:text-[#b3b3b3] text-[#000] text-sm">
                 Showing {startPost}-{endPost} of {totalPosts} results
             </div>
 
@@ -52,7 +52,7 @@ const Pagination = ({
                 <button
                     onClick={() => onPageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="px-3 py-2 text-sm font-medium text-[#b3b3b3] bg-[#282828] rounded-md hover:bg-[#65350F] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-3 py-2 text-sm font-medium dark:text-[#b3b3b3] text-[#000] dark:bg-[#282828] bg-[#fff] border border-gray-300 rounded-md hover:bg-[#65350F] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                     Previous
                 </button>
@@ -64,8 +64,8 @@ const Pagination = ({
                             onClick={() => onPageChange(1)}
                             className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                                 1 === currentPage 
-                                    ? 'bg-[#65350F] text-white' 
-                                    : 'bg-[#282828] text-[#b3b3b3] hover:bg-[#65350F] hover:text-white'
+                                    ? 'dark:bg-[#65350F] dark:text-white text-[#000] bg-[#fff] border border-gray-300' 
+                                    : 'dark:bg-[#282828] dark:text-[#b3b3b3] hover:bg-[#65350F] hover:text-white text-[#000] bg-[#fff] border border-gray-300'
                             }`}
                         >
                             1
@@ -81,8 +81,8 @@ const Pagination = ({
                         onClick={() => onPageChange(number)}
                         className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                             number === currentPage 
-                                ? 'bg-[#65350F] text-white' 
-                                : 'bg-[#282828] text-[#b3b3b3] hover:bg-[#65350F] hover:text-white'
+                                ? 'dark:bg-[#65350F] dark:text-white text-[#000] bg-[#fff] border border-gray-300' 
+                                : 'dark:bg-[#282828] dark:text-[#b3b3b3] hover:bg-[#65350F] hover:text-white text-[#000] bg-[#fff] border border-gray-300'
                         }`}
                     >
                         {number}
@@ -99,8 +99,8 @@ const Pagination = ({
                             onClick={() => onPageChange(totalPages)}
                             className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                                 totalPages === currentPage 
-                                    ? 'bg-[#65350F] text-white' 
-                                    : 'bg-[#282828] text-[#b3b3b3] hover:bg-[#65350F] hover:text-white'
+                                    ? 'dark:bg-[#65350F] dark:text-white text-[#000] bg-[#fff] border border-gray-300' 
+                                    : 'dark:bg-[#282828] dark:text-[#b3b3b3] hover:bg-[#65350F] hover:text-white text-[#000] bg-[#fff] border border-gray-300'
                             }`}
                         >
                             {totalPages}
@@ -112,7 +112,7 @@ const Pagination = ({
                 <button
                     onClick={() => onPageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-2 text-sm font-medium text-[#b3b3b3] bg-[#282828] rounded-md hover:bg-[#65350F] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-3 py-2 text-sm font-medium dark:text-[#b3b3b3] text-[#000] dark:bg-[#282828] bg-[#fff] border border-gray-300 rounded-md hover:bg-[#65350F] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                     Next
                 </button>

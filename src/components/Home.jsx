@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, } from "react";
 import Header from "./Header.jsx";
 import PodcastGrid from "../views/renderGrid.jsx";
 import LoadingSpinner from "../utilities/loadingSpinner.jsx";
@@ -9,6 +9,7 @@ import Sorter from "../utilities/podcastSorter.jsx";
 import Pagination from "../utilities/pagination.jsx";
 import { useLayout } from "../layouts/LayoutContext.jsx";
 import Sidebar from "./Sidebar.jsx";
+import HomeRenderRow from "../views/HomeRenderRow.jsx";
 
 /**
  * Home Component
@@ -149,6 +150,10 @@ const Home = () => {
         setCurrentPage(1);
     };
 
+    const handlePodcastSelect = (podcast) => {
+        console.log('Selected podcast:', podcast);
+    };
+
     const { openMobileSidebar } = useLayout();
 
     const handleSidebarToggle = (isOpen) => {
@@ -176,28 +181,48 @@ const Home = () => {
                 searchTerm={searchTerm} 
             />
 
-            {/* Mobile Sidebar Overlay */}
-            {isMobileSidebarOpen && (
-                <div 
-                    className="xl:relative sm:fixed inset-0 dark:bg-[#1a1a1a] bg-[#F4F4F4] bg-opacity-50 z-30 lg:hidden"
-                    onClick={closeMobileSidebar}
-                />
-            )}
-
-            <div className="min-h-screen flex flex-col lg:flex-row">
-                {/* Sidebar */}
-                <div className={`${isMobileSidebarOpen ? 'sm:relative inset-0 flex items-center justify-center z-40' : 'hidden'}`}>
+            <div className="min-h-screen flex">
+                {/* Sidebar - Fixed positioning */}
+                <div className={`
+                    z-40 mt-[-20px] lg:mt-0
+                    ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                    transition-transform duration-300 ease-in-out
+                `}>
                     <Sidebar />
                 </div>
             
                 {/* Main Content */}
-                <div className={`main-content flex-1 w-full dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-5 ${isSidebarOpen ? 'xl:border-l xl:border-gray-300 xl:dark:border-[#333]' : ''}`}>
-                    <div className="w-full flex flex-col gap-8">
-                        {/* Render grid for all podcasts */}
+                <div className={`
+                    main-content flex-1 w-full min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
+                    ${isSidebarOpen ? 'mt-[560px] lg:ml-0 lg:mt-0' : ''}
+                `}>
+                    <div className="w-full flex items-center flex-col gap-8">
+                        {/* Welcome Section */}
+                        <div className="mb-2">
+                            <h1 className="text-4xl font-bold text-black dark:text-white mb-2">
+                                Welcome to Sippi-Cup Pod
+                            </h1>
+                            <p className="text-gray-600 dark:text-gray-400 text-lg">
+                                Discover your next favorite podcast from our curated collection
+                            </p>
+                        </div>
+
+                        {/* Randomized Recommended Shows */}
+                        {allPodcasts && allPodcasts.length > 0 && (
+                            <section className="mb-8">
+                                <HomeRenderRow
+                                    title="Discover Something New"
+                                    allPodcasts={allPodcasts}
+                                    onPodcastSelect={handlePodcastSelect}
+                                />
+                            </section>
+                        )}
+
+                        {/* All Podcasts Grid Section */}
                         {allPodcasts && allPodcasts.length > 0 ? (
-                            <div>
+                            <section>
                                 <h2 className="font-bold text-2xl mb-4 lg:mb-2">
-                                    {searchTerm ? `Search Results for "${searchTerm}"` : 'Podcasts'}
+                                    {searchTerm ? `Search Results for "${searchTerm}"` : 'All Podcasts'}
                                     {filteredAndSortedPodcasts.length !== allPodcasts.length && (
                                         <span className="text-gray-400 text-lg ml-2">
                                             ({filteredAndSortedPodcasts.length} of {allPodcasts.length})
@@ -246,7 +271,7 @@ const Home = () => {
                                         )}
                                     </>
                                 )}
-                            </div>
+                            </section>
                         ) : (
                             <p className="text-gray-400">No podcasts found</p>
                         )}

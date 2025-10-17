@@ -192,13 +192,13 @@ const Header = ({ onSearch }) => {
             
             {/* Icons container */}
             <div className="flex items-center justify-center">
-                <div className="hidden md:block rounded-full w-10 h-10 bg-[#65350F] grid place-items-center cursor-pointer hover:bg-[#9A7B4F] mr-3 p-2">
+                <div className="hidden md:block rounded-full w-10 h-10 dark:bg-[#65350F] bg-[#9D610E] grid place-items-center cursor-pointer hover:bg-[#9A7B4F] mr-3 p-2">
                     <IoNotificationsOutline color="#b3b3b3" size={22}/>
                 </div>
-                <div className="hidden md:flex rounded-full w-10 h-10 bg-[#65350F] grid place-items-center cursor-pointer hover:bg-[#9A7B4F] mr-3 p-2">
+                <div className="hidden md:flex rounded-full w-10 h-10 dark:bg-[#65350F] bg-[#9D610E] grid place-items-center cursor-pointer hover:bg-[#9A7B4F] mr-3 p-2">
                     <IoBookOutline color="#b3b3b3" size={22} />
                 </div>
-                <div className="rounded-full w-10 h-10 bg-[#65350F] grid place-items-center cursor-pointer hover:bg-[#9A7B4F] mr-3">
+                <div className="rounded-full w-10 h-10 dark:bg-[#65350F] bg-[#9D610E] grid place-items-center cursor-pointer hover:bg-[#9A7B4F] mr-3">
                     <IoPersonOutline color="#b3b3b3" size={22} />
                 </div>
             </div>

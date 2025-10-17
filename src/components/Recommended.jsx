@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
-import RenderRow from "../views/RenderRows";
+import RenderRow from "../views/renderRows";
 import { useFetchPodcasts } from "../utilities/fetchPodcasts";
 import { useLayout } from "../layouts/LayoutContext.jsx";
 
@@ -108,24 +108,22 @@ const Recommended = () => {
         <>
             <Header onSearch={handleSearch} searchTerm={searchTerm}  />
 
-            {/* Mobile Sidebar Overlay */}
-            {isMobileSidebarOpen && (
-                <div 
-                    className="xl:relative sm:fixed  dark:bg-[#1a1a1a] bg-[#F4F4F4] bg-opacity-50 z-30 lg:hidden"
-                    onClick={closeMobileSidebar}
-                />
-            )}
-
-            <div className="min-h-screen flex flex-col xl:flex-row">
-                {/* Sidebar -  */}
-                <div className={`${isMobileSidebarOpen ? 'sm:absolute sm:inset-x-0  flex items-center justify-center z-40' : 'hidden'}`}>
+            <div className="h-screen flex">
+                {/* Sidebar - Fixed positioning */}
+                <div className={`
+                    z-40 mt-[-20px] lg:mt-0
+                    ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                    transition-transform duration-300 ease-in-out
+                `}>
                     <Sidebar />
                 </div>
             
                 {/* Main Content */}
-                <div className={`relative w-full dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6 ${
-                    isSidebarOpen ? 'xl:border-l xl:border-gray-300 xl:dark:border-[#333]' : ''
-                }`}>
+                <div className={`
+                    flex-1 min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
+                    ${isSidebarOpen ? 'mt-[560px] lg:ml-0 lg:mt-0' : 'lg:ml-0'}
+                    w-full
+                `}>
                     <div className="w-full flex flex-col">
                         <h1 className="text-3xl font-bold text-gray-600 dark:text-gray-400 mb-6">Recommended For You</h1>
 

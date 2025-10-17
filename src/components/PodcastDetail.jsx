@@ -18,7 +18,6 @@ const PodcastDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const Logo = {id: 1, image: IMAGES.LOGO, alt: "logo"};
     
     const [podcastUrl] = useState("https://podcast-api.netlify.app");
     
@@ -143,9 +142,15 @@ const PodcastDetail = () => {
         setSelectedSeason(season);
     };
 
+    const formatTime = (seconds) => {
+        if (!seconds || isNaN(seconds)) return '0:00';
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    };
+
     // Episode button component
-    // In your PodcastDetail component, update the EpisodeButton component:
-    const EpisodeButton = ({ episode, seasonNumber }) => {
+    const EpisodeButton = ({ episode, seasonNumber, index }) => {
         const [isFavorited, setIsFavorited] = useState(false);
         const { playEpisode, getEpisodeProgress, currentEpisode, isPlaying } = useAudio();
 
@@ -214,8 +219,13 @@ const PodcastDetail = () => {
         };
 
         return (
-            <div className="hover:bg-[#282828] bg-[#fff] flex items-center justify-between p-4 dark:bg-[#181818] rounded-lg dark:hover:bg-[#282828] transition-colors mb-3">
+            <div className="hover:ring-[#9D610E] hover:ring-4 bg-[#fff] flex items-center justify-between p-4 dark:bg-[#181818] rounded-lg dark:hover:bg-[#282828] transition-colors mb-3">
                 <div className="flex items-center space-x-4 flex-1 w-[50%]">
+                    <div className="flex-shrink-0 w-8 text-center">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                            {index + 1}
+                        </span>
+                    </div>
                     <img 
                         src={selectedSeason?.image || podcastData?.image || "/src/assets/SippiCup_logo.png"} 
                         alt="Episode cover" 
@@ -308,9 +318,10 @@ const PodcastDetail = () => {
         navigate(-1);
     };
 
+    const isLoading = podcastsLoading || isLoadingSeasons;
     const error = podcastsError || seasonsError;
 
-    if (podcastsLoading) {
+    if (isLoading) {
         return <LoadingSpinner message="Loading Podcast Details..." />;
     }
 
@@ -355,7 +366,7 @@ const PodcastDetail = () => {
             <div className="p-4 md:p-8">
                 <button 
                     onClick={handleBackClick}
-                    className="flex items-center space-x-2 dark:text-[#b3b3b3] text-[#000] dark:hover:text-white hover:text-[#000] mb-6 transition-colors"
+                    className="flex items-center space-x-2 dark:text-[#b3b3b3] text-[#000] dark:hover:text-white hover:text-[#9D610E] mb-6 transition-colors"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -376,7 +387,7 @@ const PodcastDetail = () => {
                     
                     {/* Podcast Info */}
                     <div className="flex-1">
-                        <h1 className="text-3xl md:text-4xl font-bold mb-4">{podcastData.title}</h1>
+                        <h1 className="text-3xl md:text-4xl dark:text-[#b3b3b3] text-[#000] font-bold mb-4">{podcastData.title}</h1>
                         <p className="dark:text-gray-300 text-gray-700 mb-6 leading-relaxed">{podcastData.description}</p>
                         
                         {/* Genres */}
@@ -433,17 +444,22 @@ const PodcastDetail = () => {
                             {/* Season Overview Display */}
                             {currentSeasons.length > 1 && (
                                 <div className="mt-8">
-                                    <h5 className="text-lg font-medium text-white mb-4">All Seasons</h5>
+                                    <h5 className="text-lg font-medium dark:text-gray-300 text-gray-700 mb-4">All Seasons</h5>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {currentSeasons.map((season) => (
+                                        {currentSeasons.map((season, index) => (
                                             <div 
                                                 key={season.season}
-                                                className={`p-4 hover:bg-[#282828] bg-[#fff] dark:bg-[#181818] rounded-lg cursor-pointer dark:hover:bg-[#282828] transition-colors ${
-                                                    selectedSeason?.season === season.season ? 'ring-2 ring-[#65350F]' : ''
+                                                className={`p-4 hover:ring-[#9D610E] hover:ring-4 bg-[#fff] dark:bg-[#181818] rounded-lg cursor-pointer dark:hover:bg-[#282828] transition-colors ${
+                                                    selectedSeason?.season === season.season ? 'ring-4 ring-[#9D610E]' : ''
                                                 }`}
                                                 onClick={() => setSelectedSeason(season)}
                                             >
                                                 <div className="flex items-center space-x-3">
+                                                    <div className="flex-shrink-0 w-8 text-center">
+                                                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                                                            {index + 1}
+                                                        </span>
+                                                    </div>
                                                     <img 
                                                         src={season.image || podcastData.image || IMAGES.LOGO} 
                                                         alt={`Season ${season.season} cover`} 
@@ -484,7 +500,7 @@ const PodcastDetail = () => {
                         {selectedSeason && (
                             <div className="mb-8">
                                 {/* Season Header */}
-                                <div className="flex items-start space-x-4 p-4 hover:bg-[#282828] bg-[#fff] items-center justify-between p-4 dark:bg-[#181818] rounded-lg dark:hover:bg-[#282828] rounded-lg mb-6">
+                                <div className="flex items-start space-x-4 p-4 hover:ring-[#9D610E] hover:ring-4 bg-[#fff] dark:hover:bg-[#65350F] dark:bg-[#282828] items-center justify-between p-4 rounded-lg rounded-lg mb-6">
                                     <img 
                                         src={selectedSeason.image || podcastData.image || IMAGES.LOGO} 
                                         alt={`Season ${selectedSeason.season} cover`} 
@@ -510,9 +526,10 @@ const PodcastDetail = () => {
                                     <h5 className="text-lg font-medium dark:text-white text-[#000] mb-4">Episodes</h5>
                                     {selectedSeason.episodes && selectedSeason.episodes.length > 0 ? (
                                         <div className="space-y-3">
-                                            {selectedSeason.episodes.map((episode) => (
+                                            {selectedSeason.episodes.map((episode, index) => (
                                                 <EpisodeButton 
-                                                    key={`${selectedSeason.season}-${episode.episode}`} 
+                                                    key={`${selectedSeason.season}-${episode.episode}`}
+                                                    index={index}
                                                     episode={episode} 
                                                     seasonNumber={selectedSeason.season}
                                                 />

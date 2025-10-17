@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import PodcastCard from "../components/PodcastCard.jsx";
 import { useLayout } from "../layouts/LayoutContext.jsx"; 
 
-const RenderRow = ({ title, allPodcasts, onPodcastSelect }) => {
+const HomeRenderRow = ({ title, allPodcasts, onPodcastSelect }) => {
     const scrollContainerRef = useRef(null);
     const [showLeftButton, setShowLeftButton] = useState(false);
     const [showRightButton, setShowRightButton] = useState(true);
@@ -152,8 +152,14 @@ const RenderRow = ({ title, allPodcasts, onPodcastSelect }) => {
     const containerPadding = getContainerPadding();
 
     return (
-        <div className="flex flex-col mb-8">
-            <h1 className="text-2xl font-bold text-black dark:text-white mb-6">{title}</h1>
+        <div className="flex flex-col mb-8 lg:w-[92%] w-full">
+            <h1 className="text-2xl font-bold text-black dark:text-white mb-4 px-4">
+                {title}
+                <span className="text-sm text-gray-500 ml-2 font-normal">
+                    ({randomizedPodcasts.length} shows)
+                </span>
+            </h1>
+            
             <div className="flex items-center relative group">
                 <button 
                     onClick={scrollLeft}
@@ -168,17 +174,17 @@ const RenderRow = ({ title, allPodcasts, onPodcastSelect }) => {
                     </svg>
                 </button>
 
-                {/* Podcasts Container */}
                 <div 
+                    ref={scrollContainerRef}
                     className={`flex items-center gap-4 w-full overflow-x-auto scrollbar-hide scroll-smooth py-3 ${containerPadding}
                               transition-all duration-300 ease-in-out`}
                     style={{ 
                         scrollbarWidth: 'none', 
                         msOverflowStyle: 'none',
-                        maxWidth: isSidebarOpen ? 'calc(100vw - 22rem)' : '100vw'
+                        maxWidth: isSidebarOpen ? 'calc(100vw - 23rem)' : '100vw'
                     }}
                 >
-                    {allPodcasts.map(podcast => (
+                    {randomizedPodcasts.map((podcast) => (
                         <div 
                             key={podcast.id} 
                             className="flex-shrink-0 transition-transform duration-200 hover:scale-105"
@@ -188,7 +194,6 @@ const RenderRow = ({ title, allPodcasts, onPodcastSelect }) => {
                             }}
                         >
                             <PodcastCard
-                                key={podcast.id}
                                 podcast={podcast}
                                 onPodcastSelect={onPodcastSelect}
                             />
@@ -196,7 +201,6 @@ const RenderRow = ({ title, allPodcasts, onPodcastSelect }) => {
                     ))}
                 </div>
 
-                {/* Right Scroll Button */}
                 <button 
                     onClick={scrollRight}
                     className={`absolute right-0 z-10 p-3 bg-black bg-opacity-70 rounded-full hover:bg-opacity-90 
@@ -214,4 +218,4 @@ const RenderRow = ({ title, allPodcasts, onPodcastSelect }) => {
     );
 };
 
-export default RenderRow;
+export default HomeRenderRow;

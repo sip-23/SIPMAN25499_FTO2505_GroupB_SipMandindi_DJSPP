@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "./Sidebar";
-import Header from "./Header";
+import Sidebar from "./Sidebar.jsx";
+import Header from "./Header.jsx";
 import { useLayout } from "../layouts/LayoutContext.jsx";
-import { useAudio } from "../utilities/AudioContext";
+import { useAudio } from "../utilities/AudioContext.jsx";
 
-const Popular = () => {
+const Favourites = () => {
     const [favorites, setFavorites] = useState([]);
     const [sortBy, setSortBy] = useState('dateAdded');
     const [sortOrder, setSortOrder] = useState('desc');
@@ -111,24 +111,22 @@ const Popular = () => {
         <>
             <Header onSearch={handleSearch} searchTerm={searchTerm} />
 
-            {/* Mobile Sidebar Overlay */}
-            {isMobileSidebarOpen && (
-                <div 
-                    className="xl:relative sm:fixed  dark:bg-[#1a1a1a] bg-[#F4F4F4] bg-opacity-50 z-30 lg:hidden"
-                    onClick={closeMobileSidebar}
-                />
-            )}
-
-            <div className="min-h-screen flex flex-col xl:flex-row">
-                {/* Sidebar -  */}
-                <div className={`${isMobileSidebarOpen ? 'sm:absolute sm:inset-x-0  flex items-center justify-center z-40' : 'hidden'}`}>
+            <div className="min-h-screen flex">
+                {/* Sidebar - Fixed positioning */}
+                <div className={`
+                    z-40 mt-[-20px] lg:mt-0
+                    ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                    transition-transform duration-300 ease-in-out
+                `}>
                     <Sidebar />
                 </div>
             
                 {/* Main Content */}
-                <div className={`flex-1 w-full dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6 ${
-                    isSidebarOpen ? 'xl:border-l xl:border-gray-300 xl:dark:border-[#333]' : ''
-                }`}>
+                <div className={`
+                    flex-1 min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
+                    ${isSidebarOpen ? 'mt-[560px] lg:ml-0 lg:mt-0' : 'lg:ml-0'}
+                    w-full
+                `}>
                     <div className="max-w-6xl mx-auto">
                         {/* Header Section */}
                         <div className="mb-8">
@@ -222,7 +220,7 @@ const Popular = () => {
                                             return (
                                                 <div 
                                                     key={favorite.episodeId}
-                                                    className="flex items-center gap-4 p-4 rounded-lg bg-white dark:bg-[#181818] hover:bg-gray-50 dark:hover:bg-[#282828] transition-colors cursor-pointer group"
+                                                    className="flex items-center gap-4 p-4 rounded-lg bg-white dark:bg-[#181818] hover:ring-4 hover:ring-[#9D610E] dark:hover:bg-[#282828] transition-colors cursor-pointer group"
                                                     onClick={() => handlePlayEpisode(favorite)}
                                                 >
                                                     {/* Episode Number */}
@@ -350,4 +348,4 @@ const Popular = () => {
     );
 };
 
-export default Popular;
+export default Favourites;

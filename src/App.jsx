@@ -2,7 +2,7 @@ import './App.css'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Home from "./components/Home.jsx"
 import PodcastDetail from "./components/podcastDetail.jsx"
-import Popular from "./components/Popular.jsx"
+import Favourites from "./components/Favourites.jsx"
 import Recommended from "./components/Recommended.jsx"
 import ResumePlaylistPage from "./components/ResumePodcast.jsx"
 import { ThemeProvider } from './utilities/ThemeContext.jsx'
@@ -16,12 +16,13 @@ function App() {
       <LayoutProvider>
         <AudioProvider>
           <Router>
-            <div>
+            <div className="pb-32">
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/podcast/:id" element={<PodcastDetail />} />
-                <Route path="/popular" element={<Popular />} />
+                <Route path="/favourites" element={<Favourites />} />
                 <Route path="/recommended" element={<Recommended />} />
+                <Route path="/resume-playlist" element={<ResumePlaylistPage />}/>
               </Routes>
               <GlobalAudioPlayer />
             </div>

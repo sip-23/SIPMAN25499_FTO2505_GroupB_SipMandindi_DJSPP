@@ -4,7 +4,6 @@ import { useAudio } from '../utilities/AudioContext';
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import { useLayout } from "../layouts/LayoutContext.jsx";
-import { LayoutProvider } from '../layouts/LayoutContext.jsx'
 
 
 const ResumePlaylistPage = () => {
