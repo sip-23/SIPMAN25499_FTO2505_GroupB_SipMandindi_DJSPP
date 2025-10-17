@@ -2,10 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAudio } from '../utilities/AudioContext';
 
-
 const ResumePlaylist = () => {
     const navigate = useNavigate();
-    const { recentlyPlayed, playEpisode, currentEpisode, isPlaying } = useAudio();
+    const { recentlyPlayed, playEpisode, currentEpisode, isPlaying, getEpisodeProgress } = useAudio();
 
     const handlePlayEpisode = (episode) => {
         playEpisode(episode);
@@ -21,18 +20,14 @@ const ResumePlaylist = () => {
         navigate(`/podcast/${podcastId}`);
     };
 
-    const getEpisodeProgress = (episodeId) => {
-        const progress = localStorage.getItem(`progress_${episodeId}`);
-        return progress ? JSON.parse(progress) : null;
-    };
-
     const getProgressPercentage = (episodeId) => {
         const progress = getEpisodeProgress(episodeId);
         if (!progress || !progress.duration) return 0;
         return (progress.currentTime / progress.duration) * 100;
     };
 
-    if (topEpisodes.length === 0) {
+    // Check if there are no recently played episodes
+    if (recentlyPlayed.length === 0) {
         return (
             <div className="w-full">
                 <button 
@@ -88,7 +83,7 @@ const ResumePlaylist = () => {
 
             {/* Episode List */}
             <div className="space-y-3 max-h-60 overflow-y-auto scrollbar-hide">
-                {recentlyPlayed.map((episode, index) => {
+                {recentlyPlayed.slice(0, 3).map((episode, index) => { // Show only first 3 episodes
                     const isCurrentlyPlaying = currentEpisode?.episodeId === episode.episodeId && isPlaying;
                     const progress = getEpisodeProgress(episode.episodeId);
                     const progressPercentage = getProgressPercentage(episode.episodeId);
@@ -136,7 +131,7 @@ const ResumePlaylist = () => {
                                                 {progress.completed ? 'Completed' : `${Math.round(progressPercentage)}%`}
                                             </span>
                                             <span>
-                                                S{episode.seasonNumber} E{episode.episodeNumber}
+                                                S{episode.season} E{episode.episode}
                                             </span>
                                         </div>
                                     </div>

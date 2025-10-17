@@ -207,6 +207,7 @@ const PodcastDetail = () => {
                 seasonNumber: seasonNumber,
                 showTitle: podcastData.title,
                 showImage: podcastData.image,
+                audioUrl: episode.file,
                 dateAdded: new Date().toISOString()
             };
 

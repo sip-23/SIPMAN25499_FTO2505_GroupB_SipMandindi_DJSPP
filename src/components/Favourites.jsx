@@ -20,13 +20,71 @@ const Favourites = () => {
         isMobileSidebarOpen
     } = useLayout();
 
+    // Check if audio URL is valid - improved version
+    const isValidAudioUrl = (url) => {
+        if (!url) return false;
+        // Check if it's a valid URL format and has an audio file extension
+        try {
+            const urlObj = new URL(url);
+            const pathname = urlObj.pathname.toLowerCase();
+            const audioExtensions = ['.mp3', '.wav', '.ogg', '.m4a', '.aac', '.webm'];
+            
+            // Check if URL has an audio file extension
+            const hasAudioExtension = audioExtensions.some(ext => pathname.endsWith(ext));
+            
+            // Also accept URLs from your podcast API domain
+            const isFromPodcastApi = urlObj.hostname.includes('podcast-api.netlify.app');
+            
+            return hasAudioExtension || isFromPodcastApi;
+        } catch {
+            return false;
+        }
+    };
+
+    // Debug function to check what's in localStorage
+    const debugFavorites = () => {
+        const savedFavorites = localStorage.getItem('podcastFavorites');
+        if (savedFavorites) {
+            const parsedFavorites = JSON.parse(savedFavorites);
+            console.log('DEBUG - Raw favorites from localStorage:', parsedFavorites);
+            parsedFavorites.forEach((fav, index) => {
+                console.log(`Favorite ${index + 1}:`, {
+                    title: fav.episodeTitle,
+                    audioUrl: fav.audioUrl,
+                    hasAudioUrl: !!fav.audioUrl,
+                    isValid: isValidAudioUrl(fav.audioUrl)
+                });
+            });
+        }
+    };
+
     useEffect(() => {
         const savedFavorites = localStorage.getItem('podcastFavorites');
         if (savedFavorites) {
             const parsedFavorites = JSON.parse(savedFavorites);
-            console.log('Loaded favorites:', parsedFavorites); 
-            setFavorites(parsedFavorites);
+            console.log('Loaded favorites:', parsedFavorites);
+            
+            // Enhanced favorites with proper audio URL validation
+            const enhancedFavorites = parsedFavorites.map(favorite => ({
+                ...favorite,
+                hasValidAudio: isValidAudioUrl(favorite.audioUrl)
+            }));
+            
+            setFavorites(enhancedFavorites);
+            
+            // Debug log to see what's happening
+            console.log('Enhanced favorites:', enhancedFavorites);
+            enhancedFavorites.forEach((fav, index) => {
+                console.log(`Enhanced ${index + 1}:`, {
+                    title: fav.episodeTitle,
+                    audioUrl: fav.audioUrl,
+                    hasValidAudio: fav.hasValidAudio
+                });
+            });
         }
+        
+        // Run debug on component mount
+        debugFavorites();
     }, []);
 
     const removeFromFavorites = (episodeId) => {
@@ -35,15 +93,15 @@ const Favourites = () => {
         localStorage.setItem('podcastFavorites', JSON.stringify(updatedFavorites));
     };
 
-    const handlePlayEpisode = (favorite) => {
+    const handlePlayEpisode = async (favorite) => {
         // Check if the favorite has a valid audio URL
-        if (!favorite.audioUrl) {
-            console.error('No audio URL found for favorite:', favorite);
-            alert('This episode does not have a valid audio file.');
+        if (!favorite.hasValidAudio) {
+            console.error('No valid audio URL found for favorite:', favorite);
+            console.log('Audio URL that failed:', favorite.audioUrl);
+            alert('This episode does not have a valid audio file available.');
             return;
         }
 
-        // Log the audio URL for debugging
         console.log('Attempting to play audio URL:', favorite.audioUrl);
 
         const episodeData = {
@@ -56,7 +114,12 @@ const Favourites = () => {
             showImage: favorite.showImage
         };
         
-        playEpisode(episodeData);
+        try {
+            await playEpisode(episodeData);
+        } catch (error) {
+            console.error('Failed to play episode:', error);
+            alert('Failed to play this episode. The audio file may be unavailable.');
+        }
     };
 
     const handleNavigateToPodcast = (favorite, e) => {
@@ -82,19 +145,20 @@ const Favourites = () => {
         return (progress.currentTime / progress.duration) * 100;
     };
 
-    // Debug function to check favorite structure
-    const debugFavorite = (favorite) => {
-        console.log('Favorite structure:', {
-            episodeId: favorite.episodeId,
-            audioUrl: favorite.audioUrl,
-            episodeTitle: favorite.episodeTitle,
-            hasAudioUrl: !!favorite.audioUrl,
-            audioUrlType: typeof favorite.audioUrl
-        });
-    };
+    // Filter favorites based on search term
+    const filteredFavorites = favorites.filter(favorite => {
+        if (!searchTerm) return true;
+        
+        const searchLower = searchTerm.toLowerCase();
+        return (
+            favorite.episodeTitle?.toLowerCase().includes(searchLower) ||
+            favorite.showTitle?.toLowerCase().includes(searchLower) ||
+            favorite.episodeDescription?.toLowerCase().includes(searchLower)
+        );
+    });
 
     // Group favorites by show
-    const groupedFavorites = favorites.reduce((groups, favorite) => {
+    const groupedFavorites = filteredFavorites.reduce((groups, favorite) => {
         const showTitle = favorite.showTitle;
         if (!groups[showTitle]) {
             groups[showTitle] = [];
@@ -122,6 +186,15 @@ const Favourites = () => {
         <>
             <Header onSearch={handleSearch} searchTerm={searchTerm} />
 
+            {/* Debug Button - Remove in production */}
+            <button 
+                onClick={debugFavorites}
+                className="fixed top-20 right-4 z-50 bg-blue-500 text-white p-2 rounded text-sm"
+                style={{ display: 'none' }} // Hide by default, change to 'block' to see it
+            >
+                Debug Favorites
+            </button>
+
             <div className="h-full flex">
                 {/* Sidebar - Fixed positioning */}
                 <div className={`
@@ -148,11 +221,24 @@ const Favourites = () => {
                                     </h1>
                                     <p className="text-gray-600 dark:text-gray-400">
                                         Your collection of loved podcast episodes
+                                        {searchTerm && (
+                                            <span className="ml-2">
+                                                - Search results for "{searchTerm}"
+                                            </span>
+                                        )}
                                     </p>
                                 </div>
                                 
-                                {/* Sorting Controls */}
-                                <div className="flex gap-4 mt-4 md:mt-0">
+                                {/* Debug and Sorting Controls */}
+                                <div className="flex flex-col md:flex-row gap-4 mt-4 md:mt-0">
+                                    {/* Debug button - remove in production */}
+                                    <button 
+                                        onClick={debugFavorites}
+                                        className="px-3 py-2 bg-yellow-500 text-black rounded text-sm md:hidden"
+                                    >
+                                        Debug
+                                    </button>
+                                    
                                     <select 
                                         value={sortBy}
                                         onChange={(e) => setSortBy(e.target.value)}
@@ -174,16 +260,20 @@ const Favourites = () => {
 
                             {/* Stats */}
                             <div className="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
-                                <span>{favorites.length} episodes</span>
+                                <span>{filteredFavorites.length} {searchTerm ? 'filtered' : ''} episodes</span>
                                 <span>•</span>
                                 <span>
-                                    Added from {Object.keys(groupedFavorites).length} different shows
+                                    {Object.keys(groupedFavorites).length} shows
+                                </span>
+                                <span>•</span>
+                                <span>
+                                    {favorites.filter(fav => fav.hasValidAudio).length} with audio
                                 </span>
                             </div>
                         </div>
 
                         {/* Episodes List */}
-                        {Object.keys(groupedFavorites).length === 0 ? (
+                        {filteredFavorites.length === 0 ? (
                             <div className="text-center py-16">
                                 <div className="w-24 h-24 mx-auto mb-4 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center">
                                     <svg className="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
@@ -191,17 +281,29 @@ const Favourites = () => {
                                     </svg>
                                 </div>
                                 <h3 className="text-xl font-medium text-black dark:text-white mb-2">
-                                    No favorite episodes yet
+                                    {searchTerm ? 'No matching episodes' : 'No favorite episodes yet'}
                                 </h3>
                                 <p className="text-gray-600 dark:text-gray-400 mb-6">
-                                    Start adding episodes to your favorites by clicking the heart icon
+                                    {searchTerm 
+                                        ? 'No episodes match your search criteria'
+                                        : 'Start adding episodes to your favorites by clicking the heart icon'
+                                    }
                                 </p>
-                                <button
-                                    onClick={() => navigate('/')}
-                                    className="px-6 py-3 bg-[#65350F] hover:bg-[#1ed760] text-white rounded-full transition-colors"
-                                >
-                                    Browse Podcasts
-                                </button>
+                                {searchTerm ? (
+                                    <button
+                                        onClick={() => setSearchTerm('')}
+                                        className="px-6 py-3 bg-[#65350F] hover:bg-[#1ed760] text-white rounded-full transition-colors"
+                                    >
+                                        Clear Search
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => navigate('/')}
+                                        className="px-6 py-3 bg-[#65350F] hover:bg-[#1ed760] text-white rounded-full transition-colors"
+                                    >
+                                        Browse Podcasts
+                                    </button>
+                                )}
                             </div>
                         ) : (
                             <div className="space-y-8">
@@ -227,7 +329,7 @@ const Favourites = () => {
                                             const isCurrentlyPlaying = currentEpisode?.episodeId === favorite.episodeId && isPlaying;
                                             const progress = getEpisodeProgress(favorite.episodeId);
                                             const progressPercentage = getProgressPercentage(favorite.episodeId);
-                                            const hasAudio = !!favorite.audioUrl;
+                                            const hasAudio = favorite.hasValidAudio;
                                             
                                             return (
                                                 <div 
@@ -313,9 +415,18 @@ const Favourites = () => {
                                                             {favorite.episodeDescription || 'No description available'}
                                                         </p>
                                                         
+                                                        {/* Audio URL Debug Info - Remove in production */}
+                                                        {!hasAudio && favorite.audioUrl && (
+                                                            <div className="mt-2 p-2 bg-yellow-100 dark:bg-yellow-900 rounded text-xs">
+                                                                <p className="text-yellow-800 dark:text-yellow-200">
+                                                                    <strong>Debug Info:</strong> URL exists but failed validation: {favorite.audioUrl}
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                        
                                                         {/* Date Added */}
                                                         <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                                                            Added on {new Date(favorite.dateAdded).toLocaleDateString()} at {new Date(favorite.dateAdded).toLocaleTimeString()}
+                                                            Added on {new Date(favorite.dateAdded).toLocaleDateString()}
                                                         </p>
                                                         
                                                         {/* Progress Bar */}
@@ -346,7 +457,11 @@ const Favourites = () => {
                                                             if (hasAudio) {
                                                                 handlePlayEpisode(favorite);
                                                             } else {
-                                                                alert('This episode does not have an audio file available.');
+                                                                alert(`This episode does not have a valid audio file available. 
+                                                                    
+Audio URL: ${favorite.audioUrl || 'No URL found'}
+
+You may need to re-add this episode from the podcast page.`);
                                                             }
                                                         }}
                                                         className={`flex-shrink-0 p-3 rounded-full transition-colors ${
@@ -354,7 +469,7 @@ const Favourites = () => {
                                                                 ? 'bg-[#65350F] hover:bg-[#1ed760] text-white' 
                                                                 : 'bg-gray-400 cursor-not-allowed text-gray-200'
                                                         }`}
-                                                        title={hasAudio ? (isCurrentlyPlaying ? 'Pause' : 'Play') : 'No audio available'}
+                                                        title={hasAudio ? (isCurrentlyPlaying ? 'Pause' : 'Play') : `No audio available: ${favorite.audioUrl || 'No URL'}`}
                                                         disabled={!hasAudio}
                                                     >
                                                         {isCurrentlyPlaying ? (

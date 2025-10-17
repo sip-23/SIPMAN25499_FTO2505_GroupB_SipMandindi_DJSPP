@@ -5,7 +5,6 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 import { useLayout } from "../layouts/LayoutContext.jsx";
 
-
 const ResumePlaylistPage = () => {
     const navigate = useNavigate();
     const { 
@@ -24,26 +23,54 @@ const ResumePlaylistPage = () => {
 
     const [sortedEpisodes, setSortedEpisodes] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Debug function to check localStorage
+    const debugStorage = () => {
+        const savedRecentlyPlayed = localStorage.getItem('recentlyPlayedEpisodes');
+        console.log('DEBUG - recentlyPlayed from localStorage:', savedRecentlyPlayed);
+        console.log('DEBUG - recentlyPlayed state:', recentlyPlayed);
+        console.log('DEBUG - sortedEpisodes:', sortedEpisodes);
+        console.log('DEBUG - isLoading:', isLoading);
+    };
 
     // Sort episodes by most recently played
     useEffect(() => {
-        const sorted = [...recentlyPlayed].sort((a, b) => {
-            const progressA = getEpisodeProgress(a.episodeId);
-            const progressB = getEpisodeProgress(b.episodeId);
+        console.log('Sorting episodes, recentlyPlayed count:', recentlyPlayed.length);
+        
+        if (recentlyPlayed.length > 0) {
+            const sorted = [...recentlyPlayed].sort((a, b) => {
+                const progressA = getEpisodeProgress(a.episodeId);
+                const progressB = getEpisodeProgress(b.episodeId);
+                
+                if (progressA && progressB) {
+                    return new Date(progressB.lastListened) - new Date(progressA.lastListened);
+                }
+                return 0;
+            });
+            setSortedEpisodes(sorted);
+            setIsLoading(false);
             
-            if (progressA && progressB) {
-                return new Date(progressB.lastListened) - new Date(progressA.lastListened);
-            }
-            return 0;
-        });
-        setSortedEpisodes(sorted);
+            console.log('After sorting - sortedEpisodes count:', sorted.length);
+        } else {
+            setIsLoading(false);
+        }
     }, [recentlyPlayed, getEpisodeProgress]);
+
+    // Debug on component mount and when data changes
+    useEffect(() => {
+        console.log('ResumePlaylistPage mounted or data changed');
+        console.log('recentlyPlayed length:', recentlyPlayed.length);
+        console.log('sortedEpisodes length:', sortedEpisodes.length);
+        debugStorage();
+    }, [recentlyPlayed, sortedEpisodes]);
 
     const handleSearch = (term) => {
         setSearchTerm(term);
     };
 
     const handlePlayEpisode = (episode) => {
+        console.log('Playing episode from resume playlist:', episode.title);
         playEpisode(episode);
     };
 
@@ -79,14 +106,61 @@ const ResumePlaylistPage = () => {
     const handleClearPlaylist = () => {
         if (window.confirm('Are you sure you want to clear your resume playlist? This action cannot be undone.')) {
             clearRecentlyPlayed();
+            setSortedEpisodes([]);
         }
     };
 
     const { openMobileSidebar } = useLayout();
 
+    // Show loading state while data is being loaded
+    if (isLoading) {
+        return (
+            <>
+                <Header onSearch={handleSearch} searchTerm={searchTerm} />
+                <div className="h-full flex">
+                    <div className={`
+                        z-40 mt-[-20px] lg:mt-0
+                        ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                        transition-transform duration-300 ease-in-out
+                    `}>
+                        <Sidebar />
+                    </div>
+                    <div className={`
+                        flex-1 min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
+                        ${isSidebarOpen ? 'mt-[500px] lg:ml-0 lg:mt-0' : 'lg:ml-0'}
+                        w-full
+                    `}>
+                        <div className="max-w-6xl mx-auto">
+                            <div className="text-center py-16">
+                                <div className="w-24 h-24 mx-auto mb-4 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center">
+                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#9D610E]"></div>
+                                </div>
+                                <h3 className="text-xl font-medium text-black dark:text-white mb-2">
+                                    Loading your playlist...
+                                </h3>
+                                <p className="text-gray-600 dark:text-gray-400">
+                                    Please wait while we load your recently played episodes
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </>
+        );
+    }
+
     return (
         <>
-            <Header onSearch={handleSearch} searchTerm={searchTerm}  />
+            <Header onSearch={handleSearch} searchTerm={searchTerm} />
+
+            {/* Debug Button - Remove in production */}
+            <button 
+                onClick={debugStorage}
+                className="fixed top-20 right-4 z-50 bg-blue-500 text-white p-2 rounded text-sm"
+                style={{ display: 'block' }} // Change to 'none' to hide in production
+            >
+                Debug Storage
+            </button>
 
             {/* Mobile Sidebar Overlay */}
             <div className="h-full flex">
@@ -102,7 +176,7 @@ const ResumePlaylistPage = () => {
                 {/* Main Content */}
                 <div className={`
                     flex-1 min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
-                    ${isSidebarOpen ? 'mt-[560px] lg:ml-0 lg:mt-0' : 'lg:ml-0'}
+                    ${isSidebarOpen ? 'mt-[500px] lg:ml-0 lg:mt-0' : 'lg:ml-0'}
                     w-full
                 `}>
                     <div className="max-w-6xl mx-auto">
@@ -123,13 +197,21 @@ const ResumePlaylistPage = () => {
                                     </p>
                                 </div>
                                 
-                                {recentlyPlayed.length > 0 && (
-                                    <button
-                                        onClick={handleClearPlaylist}
-                                        className="mt-4 md:mt-0 px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-full transition-colors"
-                                    >
-                                        Clear All
-                                    </button>
+                                {sortedEpisodes.length > 0 && (
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={debugStorage}
+                                            className="mt-4 md:mt-0 px-4 py-2 text-sm bg-yellow-600 hover:bg-yellow-700 text-white rounded-full transition-colors"
+                                        >
+                                            Debug
+                                        </button>
+                                        <button
+                                            onClick={handleClearPlaylist}
+                                            className="mt-4 md:mt-0 px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-full transition-colors"
+                                        >
+                                            Clear All
+                                        </button>
+                                    </div>
                                 )}
                             </div>
 
@@ -137,9 +219,13 @@ const ResumePlaylistPage = () => {
                             <div className="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
                                 <span>
                                     {filteredEpisodes.length} {searchTerm ? 'filtered' : ''} episodes
-                                    {searchTerm && filteredEpisodes.length !== recentlyPlayed.length && (
-                                        <span> (of {recentlyPlayed.length} total)</span>
+                                    {searchTerm && filteredEpisodes.length !== sortedEpisodes.length && (
+                                        <span> (of {sortedEpisodes.length} total)</span>
                                     )}
+                                </span>
+                                <span>•</span>
+                                <span>
+                                    {sortedEpisodes.length} total episodes
                                 </span>
                                 <span>•</span>
                                 <span>
@@ -152,7 +238,7 @@ const ResumePlaylistPage = () => {
                         </div>
 
                         {/* Episodes List */}
-                        {recentlyPlayed.length === 0 ? (
+                        {sortedEpisodes.length === 0 ? (
                             <div className="text-center py-16">
                                 <div className="w-24 h-24 mx-auto mb-4 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center">
                                     <svg className="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
