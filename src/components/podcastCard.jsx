@@ -13,7 +13,6 @@ const PodcastCard = ({ podcast }) => {
 
     // Fetch genre data from API endpoint: https://podcast-api.netlify.app/genre/{ID}
     const fetchGenreData = async (genreId) => {
-        for (let i = 0; i < retries; i++) {
         try {
             const response = await fetch(`https://podcast-api.netlify.app/genre/${genreId}`);
             if (!response.ok) {
@@ -22,16 +21,9 @@ const PodcastCard = ({ podcast }) => {
             const genreData = await response.json();
             return genreData;
         } catch (err) {
-            console.warn(`Attempt ${i + 1} failed for genre ${genreId}:`, err);
-                if (i === retries - 1) {
-                    console.error(`All attempts failed for genre ${genreId}`);
-                    return null;
-                }
-                // Wait before retrying (exponential backoff)
-                await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
-            }
+            console.error(`Error fetching genre ${genreId}:`, err);
+            return null;
         }
-        return null;
     };
 
     // Fetch all genres for this podcast

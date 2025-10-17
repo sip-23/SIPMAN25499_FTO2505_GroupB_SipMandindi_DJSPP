@@ -23,73 +23,73 @@ export const AudioProvider = ({ children }) => {
   const [recentlyPlayed, setRecentlyPlayed] = useState([]);
 
   // Load from localStorage on mount
-  useEffect(() => {
-    const savedVolume = localStorage.getItem('audioVolume');
-    const savedHistory = localStorage.getItem('playbackHistory');
-    const savedCurrentEpisode = localStorage.getItem('currentEpisode');
-    const savedRecentlyPlayed = localStorage.getItem('recentlyPlayedEpisodes');
+    useEffect(() => {
+        const savedVolume = localStorage.getItem('audioVolume');
+        const savedHistory = localStorage.getItem('playbackHistory');
+        const savedCurrentEpisode = localStorage.getItem('currentEpisode');
+        const savedRecentlyPlayed = localStorage.getItem('recentlyPlayedEpisodes');
 
-    if (savedVolume) setVolume(parseInt(savedVolume));
-    if (savedHistory) setPlaybackHistory(JSON.parse(savedHistory));
-    if (savedCurrentEpisode) setCurrentEpisode(JSON.parse(savedCurrentEpisode));
-    if (savedRecentlyPlayed) setRecentlyPlayed(JSON.parse(savedRecentlyPlayed));
-  }, []);
+        if (savedVolume) setVolume(parseInt(savedVolume));
+        if (savedHistory) setPlaybackHistory(JSON.parse(savedHistory));
+        if (savedCurrentEpisode) setCurrentEpisode(JSON.parse(savedCurrentEpisode));
+        if (savedRecentlyPlayed) setRecentlyPlayed(JSON.parse(savedRecentlyPlayed));
+    }, []);
 
-  // Save to localStorage when values change
-  useEffect(() => {
-    localStorage.setItem('audioVolume', volume.toString());
-  }, [volume]);
+    // Save to localStorage when values change
+    useEffect(() => {
+        localStorage.setItem('audioVolume', volume.toString());
+    }, [volume]);
 
-  useEffect(() => {
-    localStorage.setItem('playbackHistory', JSON.stringify(playbackHistory));
-  }, [playbackHistory]);
+    useEffect(() => {
+        localStorage.setItem('playbackHistory', JSON.stringify(playbackHistory));
+    }, [playbackHistory]);
 
-  useEffect(() => {
-    if (currentEpisode) {
-      localStorage.setItem('currentEpisode', JSON.stringify(currentEpisode));
-    }
-  }, [currentEpisode]);
-
-  useEffect(() => {
-    localStorage.setItem('recentlyPlayedEpisodes', JSON.stringify(recentlyPlayed));
-  }, [recentlyPlayed]);
-
-  // Add this function to track recently played episodes
-  const trackRecentlyPlayed = (episodeData) => {
-    setRecentlyPlayed(prev => {
-      // Remove if already exists to avoid duplicates
-      const filtered = prev.filter(ep => ep.episodeId !== episodeData.episodeId);
-      // Add to beginning and limit to 10 episodes
-      const updated = [episodeData, ...filtered].slice(0, 10);
-      return updated;
-    });
-  };
-
-  // Audio event handlers
-  useEffect(() => {
-    const audio = audioRef.current;
-
-    const handleLoadedMetadata = () => {
-      setDuration(audio.duration);
-      
-      // Resume from saved position if available
-      const episodeId = currentEpisode?.episodeId;
-      if (episodeId && playbackHistory[episodeId]) {
-        const savedTime = playbackHistory[episodeId].currentTime;
-        if (savedTime > 0) {
-          audio.currentTime = savedTime;
-          setCurrentTime(savedTime);
+    useEffect(() => {
+        if (currentEpisode) {
+        localStorage.setItem('currentEpisode', JSON.stringify(currentEpisode));
         }
-      }
+    }, [currentEpisode]);
+
+    useEffect(() => {
+        localStorage.setItem('recentlyPlayedEpisodes', JSON.stringify(recentlyPlayed));
+    }, [recentlyPlayed]);
+
+    // Add this function to track recently played episodes
+    const trackRecentlyPlayed = (episodeData) => {
+        setRecentlyPlayed(prev => {
+        // Remove if already exists to avoid duplicates
+        const filtered = prev.filter(ep => ep.episodeId !== episodeData.episodeId);
+        // Add to beginning and limit to 10 episodes
+        const updated = [episodeData, ...filtered].slice(0, 10);
+        return updated;
+        });
     };
 
+    // Audio event handlers
+    useEffect(() => {
+        const audio = audioRef.current;
+
+        const handleLoadedMetadata = () => {
+        setDuration(audio.duration);
+        
+        // Resume from saved position if available
+        const episodeId = currentEpisode?.episodeId;
+            if (episodeId && playbackHistory[episodeId]) {
+                const savedTime = playbackHistory[episodeId].currentTime;
+                if (savedTime > 0) {
+                audio.currentTime = savedTime;
+                setCurrentTime(savedTime);
+                }
+            }
+        };
+
     const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime);
-      
-      // Save progress every 5 seconds
-      if (currentEpisode && Math.floor(audio.currentTime) % 5 === 0) {
-        saveProgress(audio.currentTime);
-      }
+        setCurrentTime(audio.currentTime);
+        
+        // Save progress every 2 seconds
+        if (currentEpisode && Math.floor(audio.currentTime) % 2 === 0) {
+            saveProgress(audio.currentTime);
+        }
     };
 
     const handleEnded = () => {
@@ -107,177 +107,188 @@ export const AudioProvider = ({ children }) => {
     };
 
     const handleError = (e) => {
-      console.error('Audio error:', e);
-      setIsPlaying(false);
+        console.error('Audio error:', e);
+        setIsPlaying(false);
+        };
+
+        audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+        audio.addEventListener('timeupdate', handleTimeUpdate);
+        audio.addEventListener('ended', handleEnded);
+        audio.addEventListener('error', handleError);
+
+        return () => {
+        audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        audio.removeEventListener('timeupdate', handleTimeUpdate);
+        audio.removeEventListener('ended', handleEnded);
+        audio.removeEventListener('error', handleError);
+        };
+    }, [currentEpisode, playbackHistory, isRepeatActive]);
+
+    // Volume control
+    useEffect(() => {
+        audioRef.current.volume = volume / 100;
+    }, [volume]);
+
+    const saveProgress = (time, completed = false) => {
+        if (!currentEpisode) return;
+
+        const episodeId = currentEpisode.episodeId;
+        setPlaybackHistory(prev => ({
+        ...prev,
+        [episodeId]: {
+            currentTime: time,
+            duration: duration,
+            completed: completed || (time >= duration * 0.95), // 95% considered completed
+            lastListened: new Date().toISOString()
+        }
+        }));
     };
 
-    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-    audio.addEventListener('timeupdate', handleTimeUpdate);
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('error', handleError);
+    const playEpisode = (episodeData) => {
+        const { episodeId, audioUrl, title, season, episode, showTitle, showImage } = episodeData;
+    
+        // Stop current playback
+        audioRef.current.pause();
+        
+        // Set new episode
+        const newEpisode = {
+        episodeId,
+        audioUrl,
+        title,
+        season,
+        episode,
+        showTitle,
+        showImage
+        };
+    
+        setCurrentEpisode(newEpisode);
 
-    return () => {
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('error', handleError);
+        // Track in recently played
+        trackRecentlyPlayed(newEpisode);
+
+        // Load and play new audio
+        audioRef.current.src = audioUrl;
+        audioRef.current.load();
+
+        const savedProgress = playbackHistory[episodeId];
+        if (savedProgress && savedProgress.currentTime > 0) {
+            audioRef.current.currentTime = savedProgress.currentTime;
+            setCurrentTime(savedProgress.currentTime);
+        } else {
+            audioRef.current.currentTime = 0;
+            setCurrentTime(0);
+        }
+        
+        setTimeout(() => {
+            audioRef.current.play().then(() => {
+                setIsPlaying(true);
+            }).catch(error => {
+                console.error('Playback failed:', error);
+            });
+        }, 100);
     };
-  }, [currentEpisode, playbackHistory, isRepeatActive]);
 
-  // Volume control
-  useEffect(() => {
-    audioRef.current.volume = volume / 100;
-  }, [volume]);
+    const togglePlayPause = () => {
+        if (!currentEpisode) return;
 
-  const saveProgress = (time, completed = false) => {
-    if (!currentEpisode) return;
-
-    const episodeId = currentEpisode.episodeId;
-    setPlaybackHistory(prev => ({
-      ...prev,
-      [episodeId]: {
-        currentTime: time,
-        duration: duration,
-        completed: completed || (time >= duration * 0.95), // 95% considered completed
-        lastListened: new Date().toISOString()
-      }
-    }));
-  };
-
-  const playEpisode = (episodeData) => {
-    const { episodeId, audioUrl, title, season, episode, showTitle, showImage } = episodeData;
-    
-    // Stop current playback
-    audioRef.current.pause();
-    
-    // Set new episode
-    const newEpisode = {
-      episodeId,
-      audioUrl,
-      title,
-      season,
-      episode,
-      showTitle,
-      showImage
+        if (isPlaying) {
+            audioRef.current.pause();
+            setIsPlaying(false);
+            // Save progress when pausing
+            saveProgress(audioRef.current.currentTime);
+        } else {
+            audioRef.current.play().then(() => {
+                setIsPlaying(true);
+            }).catch(error => {
+                console.error('Playback failed:', error);
+            });
+        }
     };
-    
-    setCurrentEpisode(newEpisode);
 
-    // Track in recently played
-    trackRecentlyPlayed(newEpisode);
+    const seekTo = (time) => {
+        if (audioRef.current) {
+        audioRef.current.currentTime = time;
+        setCurrentTime(time);
+        saveProgress(time);
+        }
+    };
 
-    // Load and play new audio
-    audioRef.current.src = audioUrl;
-    audioRef.current.load();
-    
-    setTimeout(() => {
-      audioRef.current.play().then(() => {
-        setIsPlaying(true);
-      }).catch(error => {
-        console.error('Playback failed:', error);
-      });
-    }, 100);
-  };
+    const skipForward = (seconds = 15) => {
+        if (audioRef.current) {
+        const newTime = Math.min(audioRef.current.currentTime + seconds, duration);
+        seekTo(newTime);
+        }
+    };
 
-  const togglePlayPause = () => {
-    if (!currentEpisode) return;
+    const skipBackward = (seconds = 15) => {
+        if (audioRef.current) {
+        const newTime = Math.max(audioRef.current.currentTime - seconds, 0);
+        seekTo(newTime);
+        }
+    };
 
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      audioRef.current.play().then(() => {
-        setIsPlaying(true);
-      }).catch(error => {
-        console.error('Playback failed:', error);
-      });
-    }
-  };
+    const toggleRepeat = () => {
+        setIsRepeatActive(!isRepeatActive);
+    };
 
-  const seekTo = (time) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = time;
-      setCurrentTime(time);
-      saveProgress(time);
-    }
-  };
+    const toggleShuffle = () => {
+        setIsShuffleActive(!isShuffleActive);
+    };
 
-  const skipForward = (seconds = 15) => {
-    if (audioRef.current) {
-      const newTime = Math.min(audioRef.current.currentTime + seconds, duration);
-      seekTo(newTime);
-    }
-  };
+    const stopPlayback = () => {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        setIsPlaying(false);
+        setCurrentTime(0);
+    };
 
-  const skipBackward = (seconds = 15) => {
-    if (audioRef.current) {
-      const newTime = Math.max(audioRef.current.currentTime - seconds, 0);
-      seekTo(newTime);
-    }
-  };
+    const resetHistory = () => {
+        setPlaybackHistory({});
+        setRecentlyPlayed([]);
+        localStorage.removeItem('playbackHistory');
+        localStorage.removeItem('recentlyPlayedEpisodes');
+    };
 
-  const toggleRepeat = () => {
-    setIsRepeatActive(!isRepeatActive);
-  };
+    const getEpisodeProgress = (episodeId) => {
+        return playbackHistory[episodeId] || null;
+    };
 
-  const toggleShuffle = () => {
-    setIsShuffleActive(!isShuffleActive);
-  };
+    const clearRecentlyPlayed = () => {
+        setRecentlyPlayed([]);
+        localStorage.removeItem('recentlyPlayedEpisodes');
+    };
 
-  const stopPlayback = () => {
-    audioRef.current.pause();
-    audioRef.current.currentTime = 0;
-    setIsPlaying(false);
-    setCurrentTime(0);
-  };
+    const value = {
+        // State
+        currentEpisode,
+        isPlaying,
+        currentTime,
+        duration,
+        volume,
+        isRepeatActive,
+        isShuffleActive,
+        playbackHistory,
+        recentlyPlayed,
+        
+        // Actions
+        playEpisode,
+        togglePlayPause,
+        seekTo,
+        skipForward,
+        skipBackward,
+        setVolume,
+        toggleRepeat,
+        toggleShuffle,
+        stopPlayback,
+        resetHistory,
+        getEpisodeProgress,
+        clearRecentlyPlayed,
+        trackRecentlyPlayed
+    };
 
-  const resetHistory = () => {
-    setPlaybackHistory({});
-    setRecentlyPlayed([]);
-    localStorage.removeItem('playbackHistory');
-    localStorage.removeItem('recentlyPlayedEpisodes');
-  };
-
-  const getEpisodeProgress = (episodeId) => {
-    return playbackHistory[episodeId] || null;
-  };
-
-  const clearRecentlyPlayed = () => {
-    setRecentlyPlayed([]);
-    localStorage.removeItem('recentlyPlayedEpisodes');
-  };
-
-  const value = {
-    // State
-    currentEpisode,
-    isPlaying,
-    currentTime,
-    duration,
-    volume,
-    isRepeatActive,
-    isShuffleActive,
-    playbackHistory,
-    recentlyPlayed,
-    
-    // Actions
-    playEpisode,
-    togglePlayPause,
-    seekTo,
-    skipForward,
-    skipBackward,
-    setVolume,
-    toggleRepeat,
-    toggleShuffle,
-    stopPlayback,
-    resetHistory,
-    getEpisodeProgress,
-    clearRecentlyPlayed,
-    trackRecentlyPlayed
-  };
-
-  return (
-    <AudioContext.Provider value={value}>
-      {children}
-    </AudioContext.Provider>
-  );
+    return (
+        <AudioContext.Provider value={value}>
+        {children}
+        </AudioContext.Provider>
+    );
 };

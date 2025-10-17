@@ -209,7 +209,7 @@ const Home = () => {
 
                         {/* Randomized Recommended Shows */}
                         {allPodcasts && allPodcasts.length > 0 && (
-                            <section className="mb-8">
+                            <section className="mb-8 mx-auto">
                                 <HomeRenderRow
                                     title="Discover Something New"
                                     allPodcasts={allPodcasts}

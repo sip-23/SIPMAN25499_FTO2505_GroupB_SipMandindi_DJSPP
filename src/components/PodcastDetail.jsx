@@ -152,7 +152,7 @@ const PodcastDetail = () => {
     // Episode button component
     const EpisodeButton = ({ episode, seasonNumber, index }) => {
         const [isFavorited, setIsFavorited] = useState(false);
-        const { playEpisode, getEpisodeProgress, currentEpisode, isPlaying } = useAudio();
+        const { playEpisode, getEpisodeProgress, togglePlayPause, currentEpisode, isPlaying } = useAudio();
 
         const episodeProgress = getEpisodeProgress(`${podcastData.id}-s${seasonNumber}-e${episode.episode}`);
 
@@ -179,10 +179,17 @@ const PodcastDetail = () => {
                 showImage: podcastData.image
             };
             
-            playEpisode(episodeData);
+            // Currently Playing checker
+            if (currentEpisode?.episodeId === episodeData.episodeId) {
+                // If same episode, just toggle play/pause
+                togglePlayPause();
+            } else {
+                // If different episode, play it (will resume from saved progress)
+                playEpisode(episodeData);
+            }
         };
 
-         const getProgressPercentage = () => {
+        const getProgressPercentage = () => {
             if (!episodeProgress || !episodeProgress.duration) return 0;
             return (episodeProgress.currentTime / episodeProgress.duration) * 100;
         };
@@ -304,7 +311,9 @@ const PodcastDetail = () => {
                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M8 5v14l11-7z"/>
                                 </svg>
-                                <span>{episodeProgress ? 'Resume' : 'Listen Now'}</span>
+                                <span>
+                                    {isCurrentlyPlaying ? 'Resume' : (episodeProgress ? 'Resume' : 'Listen Now')}
+                                </span>
                             </>
                         )}
                     </button>
