@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "../utilities/ThemeContext";
 import { useAudio } from '../utilities/AudioContext';
+import { useLayout } from "../layouts/LayoutContext";
 
 const Sidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { darkMode, toggleTheme } = useTheme();
     const { recentlyPlayed, playEpisode, currentEpisode, isPlaying, getEpisodeProgress } = useAudio();
+    const { closeMobileSidebar } = useLayout();
     const [topEpisodes, setTopEpisodes] = useState([]);
 
     // Get top 3 recently played episodes
@@ -16,15 +18,17 @@ const Sidebar = () => {
         setTopEpisodes(topThree);
     }, [recentlyPlayed]);
 
+    const handleNavigation = (path) => {
+        navigate(path);
+        // Close mobile sidebar on navigation
+        if (window.innerWidth < 1024) {
+            closeMobileSidebar();
+        }
+    };
+
     // Theme toggle functionality
     const handleThemeToggle = () => {
         toggleTheme();
-    };
-
-    const handleNavigation = (path) => {
-        navigate(path);
-        if (window.innerWidth < 1024) {
-        }
     };
 
     const handlePlayEpisode = (episode) => {
@@ -58,7 +62,7 @@ const Sidebar = () => {
     return (
         <aside 
             id="sidebar"
-            className="sidebar-visible absolute lg:relative inset-0 lg:inset-auto mx-auto  sm:my-4 md:my-4 lg:my-0 
+            className="sidebar-visible absolute lg:relative inset-0 lg:inset-auto mx-auto sm:my-4 md:my-4 lg:my-0 
                        w-[90vw] sm:w-[300px] md:w-[350px] lg:w-[350px] lg:h-full
                        h-fit 
                        dark:bg-[#121212] bg-[#ffffff] 

@@ -72,13 +72,47 @@ export const LayoutProvider = ({ children }) => {
     }
   };
 
+  // Add this function to handle mobile sidebar toggle
+  const toggleMobileSidebar = () => {
+    if (isMobileSidebarOpen) {
+      closeMobileSidebar();
+    } else {
+      openMobileSidebar();
+    }
+  };
+
+  // Add these functions for explicit sidebar control
+  const openSidebar = () => {
+    setIsSidebarOpen(true);
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) {
+      sidebar.classList.remove('sidebar-hidden', 'hidden');
+      sidebar.classList.add('sidebar-visible', 'block');
+    }
+  };
+
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) {
+      sidebar.classList.remove('sidebar-visible', 'block');
+      sidebar.classList.add('sidebar-hidden');
+      setTimeout(() => {
+        sidebar.classList.add('hidden');
+      }, 300);
+    }
+  };
+
   return (
     <LayoutContext.Provider value={{
       isSidebarOpen,
       isMobileSidebarOpen,
       toggleSidebar,
       closeMobileSidebar,
-      openMobileSidebar
+      openMobileSidebar,
+      toggleMobileSidebar,
+      openSidebar,
+      closeSidebar
     }}>
       {children}
     </LayoutContext.Provider>

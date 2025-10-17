@@ -108,7 +108,7 @@ const Recommended = () => {
         <>
             <Header onSearch={handleSearch} searchTerm={searchTerm}  />
 
-            <div className="h-screen flex">
+            <div className="h-full flex">
                 {/* Sidebar - Fixed positioning */}
                 <div className={`
                     z-40 mt-[-20px] lg:mt-0
@@ -120,12 +120,12 @@ const Recommended = () => {
             
                 {/* Main Content */}
                 <div className={`
-                    flex-1 min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
-                    ${isSidebarOpen ? 'mt-[560px] lg:ml-0 lg:mt-0' : 'lg:ml-0'}
+                    main-content flex-1 min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
+                    ${isSidebarOpen ? 'mt-[560px] lg:ml-0 lg:mt-0' : ''}
                     w-full
                 `}>
-                    <div className="w-full flex flex-col">
-                        <h1 className="text-3xl font-bold text-gray-600 dark:text-gray-400 mb-6">Recommended For You</h1>
+                    <div className="max-w-6xl mx-auto">
+                        <h1 className="text-3xl font-bold text-black dark:text-white mb-6">Recommended For You</h1>
 
                         
                         <div className="mb-4 p-2 bg-yellow-900 text-yellow-200 rounded text-sm">
@@ -158,7 +158,7 @@ const Recommended = () => {
                         {/* Fallback: Show popular podcasts if no genre-based recommendations */}
                         {Object.keys(recommendations).length === 0 && allPodcasts.length > 0 && (
                             <div className="mt-8">
-                                <h2 className="text-2xl font-bold mb-6">Popular Podcasts</h2>
+                                <h2 className="text-2xl font-bold mb-6 text-black dark:text-white">Popular Podcasts</h2>
                                 <RenderRow
                                     title="Trending Now"
                                     podcasts={allPodcasts.slice(0, 10)} // Show first 10 podcasts

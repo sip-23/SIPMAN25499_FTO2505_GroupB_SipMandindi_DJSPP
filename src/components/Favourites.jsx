@@ -17,9 +17,7 @@ const Favourites = () => {
     // Use layout context
     const { 
         isSidebarOpen, 
-        isMobileSidebarOpen, 
-        closeMobileSidebar,
-        openMobileSidebar 
+        isMobileSidebarOpen
     } = useLayout();
 
     useEffect(() => {
@@ -57,15 +55,7 @@ const Favourites = () => {
     };
 
     const handleSearch = (term) => {
-        console.log('Search term:', term);
-    };
-
-    const handleSidebarToggle = (isOpen) => {
-        if (isOpen) {
-            openMobileSidebar();
-        } else {
-            closeMobileSidebar();
-        }
+        setSearchTerm(term);
     };
 
     const formatTime = (seconds) => {
@@ -80,7 +70,6 @@ const Favourites = () => {
         if (!progress || !progress.duration) return 0;
         return (progress.currentTime / progress.duration) * 100;
     };
-
 
     // Group favorites by show
     const groupedFavorites = favorites.reduce((groups, favorite) => {
@@ -111,7 +100,7 @@ const Favourites = () => {
         <>
             <Header onSearch={handleSearch} searchTerm={searchTerm} />
 
-            <div className="min-h-screen flex">
+            <div className="h-full flex">
                 {/* Sidebar - Fixed positioning */}
                 <div className={`
                     z-40 mt-[-20px] lg:mt-0
@@ -123,8 +112,8 @@ const Favourites = () => {
             
                 {/* Main Content */}
                 <div className={`
-                    flex-1 min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
-                    ${isSidebarOpen ? 'mt-[560px] lg:ml-0 lg:mt-0' : 'lg:ml-0'}
+                    main-content flex-1 min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
+                    ${isSidebarOpen ? 'mt-[560px] lg:ml-0 lg:mt-0' : ''}
                     w-full
                 `}>
                     <div className="max-w-6xl mx-auto">

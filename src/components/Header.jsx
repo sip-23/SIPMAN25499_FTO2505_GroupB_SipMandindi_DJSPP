@@ -9,19 +9,20 @@ import { useLayout } from "../layouts/LayoutContext.jsx";
  * A fixed top navigation bar
  * @component
  */
-const Header = ({ onSearch }) => {
-    const [searchValue, setSearchValue] = useState("");
+const Header = ({ onSearch , searchTerm }) => {
+    const [searchValue, setSearchValue] = useState(searchTerm || "");
     const searchTimeoutRef = useRef(null);
     const searchInputRef = useRef(null);
 
     // Use layout context for sidebar state
     const { 
         isSidebarOpen, 
-        toggleSidebar,
-        closeMobileSidebar,
-        openMobileSidebar 
+        toggleMobileSidebar
     } = useLayout();
 
+    const handleToggleSidebar = () => {
+        toggleMobileSidebar();
+    };
 
     const handleSearchChange = (e) => {
         const value = e.target.value;
@@ -60,14 +61,6 @@ const Header = ({ onSearch }) => {
         }
         if (onSearch) {
             onSearch("");
-        }
-    };
-
-    const handleToggleSidebar = () => {
-        if (isSidebarOpen) {
-            closeMobileSidebar();
-        } else {
-            openMobileSidebar();
         }
     };
 

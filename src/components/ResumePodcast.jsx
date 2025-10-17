@@ -19,11 +19,11 @@ const ResumePlaylistPage = () => {
     
     const { 
         isSidebarOpen, 
-        isMobileSidebarOpen, 
-        closeMobileSidebar 
+        isMobileSidebarOpen 
     } = useLayout();
 
     const [sortedEpisodes, setSortedEpisodes] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
 
     // Sort episodes by most recently played
     useEffect(() => {
@@ -39,9 +39,24 @@ const ResumePlaylistPage = () => {
         setSortedEpisodes(sorted);
     }, [recentlyPlayed, getEpisodeProgress]);
 
+    const handleSearch = (term) => {
+        setSearchTerm(term);
+    };
+
     const handlePlayEpisode = (episode) => {
         playEpisode(episode);
     };
+
+    // Filter episodes based on search term
+    const filteredEpisodes = sortedEpisodes.filter(episode => {
+        if (!searchTerm) return true;
+        
+        const searchLower = searchTerm.toLowerCase();
+        return (
+            episode.title?.toLowerCase().includes(searchLower) ||
+            episode.showTitle?.toLowerCase().includes(searchLower)
+        );
+    });
 
     const handleNavigateToPodcast = (episode) => {
         const podcastId = episode.episodeId.split('-')[0];
@@ -71,26 +86,25 @@ const ResumePlaylistPage = () => {
 
     return (
         <>
-            <Header onSearch={() => {}} />
+            <Header onSearch={handleSearch} searchTerm={searchTerm}  />
 
             {/* Mobile Sidebar Overlay */}
-            {isMobileSidebarOpen && (
-                <div 
-                    className="xl:relative sm:fixed inset-0 dark:bg-[#1a1a1a] bg-[#F4F4F4] bg-opacity-50 z-30 lg:hidden"
-                    onClick={closeMobileSidebar}
-                />
-            )}
-
-            <div className="min-h-screen flex flex-col lg:flex-row">
-                {/* Sidebar */}
-                <div className={`${isMobileSidebarOpen ? 'sm:relative inset-0 flex items-center justify-center z-40' : 'hidden'}`}>
+            <div className="h-full flex">
+                {/* Sidebar - Fixed positioning */}
+                <div className={`
+                    z-40 mt-[-20px] lg:mt-0
+                    ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                    transition-transform duration-300 ease-in-out
+                `}>
                     <Sidebar />
                 </div>
             
                 {/* Main Content */}
-                <div className={`main-content flex-1 w-full dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6 ${
-                    isSidebarOpen && window.innerWidth >= 767 ? 'xl:border-l xl:border-gray-300 xl:dark:border-[#333]' : ''
-                }`}>
+                <div className={`
+                    flex-1 min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
+                    ${isSidebarOpen ? 'mt-[560px] lg:ml-0 lg:mt-0' : 'lg:ml-0'}
+                    w-full
+                `}>
                     <div className="max-w-6xl mx-auto">
                         {/* Header Section */}
                         <div className="mb-8">
@@ -101,6 +115,11 @@ const ResumePlaylistPage = () => {
                                     </h1>
                                     <p className="text-gray-600 dark:text-gray-400">
                                         Continue listening to your recently played episodes
+                                        {searchTerm && (
+                                            <span className="ml-2">
+                                                - Search results for "{searchTerm}"
+                                            </span>
+                                        )}
                                     </p>
                                 </div>
                                 
@@ -116,10 +135,15 @@ const ResumePlaylistPage = () => {
 
                             {/* Stats */}
                             <div className="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
-                                <span>{recentlyPlayed.length} episodes</span>
+                                <span>
+                                    {filteredEpisodes.length} {searchTerm ? 'filtered' : ''} episodes
+                                    {searchTerm && filteredEpisodes.length !== recentlyPlayed.length && (
+                                        <span> (of {recentlyPlayed.length} total)</span>
+                                    )}
+                                </span>
                                 <span>•</span>
                                 <span>
-                                    {recentlyPlayed.filter(ep => {
+                                    {filteredEpisodes.filter(ep => {
                                         const progress = getEpisodeProgress(ep.episodeId);
                                         return progress && progress.completed;
                                     }).length} completed
@@ -148,9 +172,30 @@ const ResumePlaylistPage = () => {
                                     Browse Podcasts
                                 </button>
                             </div>
+                        ) : filteredEpisodes.length === 0 ? (
+                            // Show message when search returns no results
+                            <div className="text-center py-16">
+                                <div className="w-24 h-24 mx-auto mb-4 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center">
+                                    <svg className="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                                    </svg>
+                                </div>
+                                <h3 className="text-xl font-medium text-black dark:text-white mb-2">
+                                    No episodes found
+                                </h3>
+                                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                                    No episodes match your search for "{searchTerm}"
+                                </p>
+                                <button
+                                    onClick={() => setSearchTerm('')}
+                                    className="px-6 py-3 bg-[#65350F] hover:bg-[#1ed760] text-white rounded-full transition-colors"
+                                >
+                                    Clear Search
+                                </button>
+                            </div>
                         ) : (
                             <div className="space-y-4">
-                                {sortedEpisodes.map((episode, index) => {
+                                {filteredEpisodes.map((episode, index) => {
                                     const isCurrentlyPlaying = currentEpisode?.episodeId === episode.episodeId && isPlaying;
                                     const progress = getEpisodeProgress(episode.episodeId);
                                     const progressPercentage = getProgressPercentage(episode.episodeId);

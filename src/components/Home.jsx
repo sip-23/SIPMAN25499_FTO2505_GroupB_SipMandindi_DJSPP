@@ -23,7 +23,8 @@ const Home = () => {
     // Using layout context instead of of local state
     const { 
         isSidebarOpen, 
-        isMobileSidebarOpen, 
+        isMobileSidebarOpen,
+        sidebarHeight,
         closeMobileSidebar 
     } = useLayout();
 
@@ -154,16 +155,6 @@ const Home = () => {
         console.log('Selected podcast:', podcast);
     };
 
-    const { openMobileSidebar } = useLayout();
-
-    const handleSidebarToggle = (isOpen) => {
-        if (isOpen) {
-            openMobileSidebar();
-        } else {
-            closeMobileSidebar();
-        }
-    };
-
 
     if (isLoading) {
         return <LoadingSpinner />;
@@ -181,7 +172,7 @@ const Home = () => {
                 searchTerm={searchTerm} 
             />
 
-            <div className="min-h-screen flex">
+            <div className="h-full flex">
                 {/* Sidebar - Fixed positioning */}
                 <div className={`
                     z-40 mt-[-20px] lg:mt-0
@@ -193,8 +184,9 @@ const Home = () => {
             
                 {/* Main Content */}
                 <div className={`
-                    main-content flex-1 w-full min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
-                    ${isSidebarOpen ? 'mt-[560px] lg:ml-0 lg:mt-0' : ''}
+                    main-content flex-1 min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
+                    ${isSidebarOpen ? 'mt-[560px] lg:ml-0 lg:mt-0' : ''} 
+                    w-full
                 `}>
                     <div className="w-full flex items-center flex-col gap-8">
                         {/* Welcome Section */}
