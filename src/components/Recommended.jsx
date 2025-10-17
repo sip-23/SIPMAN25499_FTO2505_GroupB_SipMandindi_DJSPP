@@ -103,7 +103,6 @@ const Recommended = () => {
         console.log('Selected podcast:', podcast);
     };
 
-
     return (
         <>
             <Header onSearch={handleSearch} searchTerm={searchTerm}  />
@@ -151,6 +150,7 @@ const Recommended = () => {
                                     title={`Because you like ${genreName}`}
                                     podcasts={recommendations[genreName]}
                                     onPodcastSelect={handlePodcastSelect}
+                                    isRecommendationRow={true} // Enable randomization
                                 />
                             ))
                         )}
@@ -161,8 +161,9 @@ const Recommended = () => {
                                 <h2 className="text-2xl font-bold mb-6 text-black dark:text-white">Popular Podcasts</h2>
                                 <RenderRow
                                     title="Trending Now"
-                                    podcasts={allPodcasts.slice(0, 10)} // Show first 10 podcasts
+                                    podcasts={allPodcasts.slice(0, 10)} // First 10 podcasts
                                     onPodcastSelect={handlePodcastSelect}
+                                    isRecommendationRow={false} // randomization
                                 />
                             </div>
                         )}

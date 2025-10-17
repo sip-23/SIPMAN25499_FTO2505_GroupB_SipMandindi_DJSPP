@@ -181,7 +181,7 @@ const HomeRenderRow = ({ title, allPodcasts, onPodcastSelect }) => {
                     style={{ 
                         scrollbarWidth: 'none', 
                         msOverflowStyle: 'none',
-                        maxWidth: isSidebarOpen ? 'calc(100vw - 23rem)' : '100vw'
+                        maxWidth: isSidebarOpen ? 'calc(100vw - 25rem)' : '100vw'
                     }}
                 >
                     {randomizedPodcasts.map((podcast) => (
