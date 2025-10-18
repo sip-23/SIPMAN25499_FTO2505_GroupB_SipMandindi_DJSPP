@@ -21,94 +21,103 @@ export const AudioProvider = ({ children }) => {
   const [isShuffleActive, setIsShuffleActive] = useState(false);
   const [playbackHistory, setPlaybackHistory] = useState({});
   const [recentlyPlayed, setRecentlyPlayed] = useState([]);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {
-    console.log('Loading data from localStorage...');
+    console.log('Loading ALL data from localStorage...');
     
-    const savedVolume = localStorage.getItem('audioVolume');
-    const savedHistory = localStorage.getItem('playbackHistory');
-    const savedCurrentEpisode = localStorage.getItem('currentEpisode');
-    const savedRecentlyPlayed = localStorage.getItem('recentlyPlayedEpisodes');
-
-    if (savedVolume) {
-      console.log('Loaded volume:', savedVolume);
-      setVolume(parseInt(savedVolume));
-    }
-    
-    if (savedHistory) {
-      try {
+    try {
+      // Load volume
+      const savedVolume = localStorage.getItem('audioVolume');
+      if (savedVolume) {
+        console.log('Loaded volume:', savedVolume);
+        setVolume(parseInt(savedVolume));
+      }
+      
+      // Load playback history
+      const savedHistory = localStorage.getItem('playbackHistory');
+      if (savedHistory) {
         const history = JSON.parse(savedHistory);
         console.log('Loaded playback history:', Object.keys(history).length, 'episodes');
+        console.log('History details:', history);
         setPlaybackHistory(history);
-      } catch (error) {
-        console.error('Error parsing playback history:', error);
+      } else {
+        console.log('No playback history found in localStorage');
       }
-    }
-    
-    if (savedCurrentEpisode) {
-      try {
+      
+      // Load current episode
+      const savedCurrentEpisode = localStorage.getItem('currentEpisode');
+      if (savedCurrentEpisode) {
         const episode = JSON.parse(savedCurrentEpisode);
         console.log('Loaded current episode:', episode?.title);
         setCurrentEpisode(episode);
-      } catch (error) {
-        console.error('Error parsing current episode:', error);
       }
-    }
-    
-    if (savedRecentlyPlayed) {
-      try {
+      
+      // Load recently played 
+      const savedRecentlyPlayed = localStorage.getItem('recentlyPlayedEpisodes');
+      if (savedRecentlyPlayed) {
         const recently = JSON.parse(savedRecentlyPlayed);
         console.log('Loaded recently played:', recently.length, 'episodes');
+        console.log('Recently played details:', recently);
         setRecentlyPlayed(recently);
-      } catch (error) {
-        console.error('Error parsing recently played:', error);
+      } else {
+        console.log('No recently played episodes found in localStorage');
       }
+      
+    } catch (error) {
+      console.error('Error loading from localStorage:', error);
+    } finally {
+      setIsInitialized(true);
+      console.log('AudioContext initialization complete');
     }
   }, []);
 
-  // Save to localStorage when values change
+  // Save to localStorage when values change 
   useEffect(() => {
+    if (!isInitialized) return;
     localStorage.setItem('audioVolume', volume.toString());
-  }, [volume]);
+    console.log('Saved volume:', volume);
+  }, [volume, isInitialized]);
 
   useEffect(() => {
+    if (!isInitialized) return;
     try {
       localStorage.setItem('playbackHistory', JSON.stringify(playbackHistory));
-      console.log('Saved playback history to localStorage');
+      console.log('Saved playback history:', Object.keys(playbackHistory).length, 'episodes');
     } catch (error) {
       console.error('Error saving playback history:', error);
     }
-  }, [playbackHistory]);
+  }, [playbackHistory, isInitialized]);
 
   useEffect(() => {
+    if (!isInitialized) return;
     if (currentEpisode) {
       try {
         localStorage.setItem('currentEpisode', JSON.stringify(currentEpisode));
-        console.log('Saved current episode to localStorage');
+        console.log('Saved current episode:', currentEpisode.title);
       } catch (error) {
         console.error('Error saving current episode:', error);
       }
     }
-  }, [currentEpisode]);
+  }, [currentEpisode, isInitialized]);
 
   useEffect(() => {
+    if (!isInitialized) return;
     try {
       localStorage.setItem('recentlyPlayedEpisodes', JSON.stringify(recentlyPlayed));
-      console.log('Saved recently played to localStorage:', recentlyPlayed.length, 'episodes');
+      console.log('Saved recently played:', recentlyPlayed.length, 'episodes');
     } catch (error) {
       console.error('Error saving recently played:', error);
     }
-  }, [recentlyPlayed]);
+  }, [recentlyPlayed, isInitialized]);
 
-  // Add this function to track recently played episodes
+  // Function to track recently played episodes
   const trackRecentlyPlayed = (episodeData) => {
     console.log('Tracking recently played episode:', episodeData.title);
     
     setRecentlyPlayed(prev => {
-      // Remove if already exists to avoid duplicates
       const filtered = prev.filter(ep => ep.episodeId !== episodeData.episodeId);
-      // Add to beginning and limit to 50 episodes (increased from 10)
       const updated = [episodeData, ...filtered].slice(0, 50);
       console.log('Updated recently played list:', updated.length, 'episodes');
       return updated;
@@ -120,26 +129,35 @@ export const AudioProvider = ({ children }) => {
     const audio = audioRef.current;
 
     const handleLoadedMetadata = () => {
-      setDuration(audio.duration);
+      const audioDuration = audio.duration;
+      setDuration(audioDuration);
+      console.log('Audio duration loaded:', audioDuration);
       
       // Resume from saved position if available
       const episodeId = currentEpisode?.episodeId;
       if (episodeId && playbackHistory[episodeId]) {
-        const savedTime = playbackHistory[episodeId].currentTime;
-        if (savedTime > 0) {
-          audio.currentTime = savedTime;
-          setCurrentTime(savedTime);
-          console.log('Resumed from saved position:', savedTime);
+        const savedProgress = playbackHistory[episodeId];
+        const savedTime = savedProgress.currentTime;
+        
+        // Only resume if we have a valid time and it's not completed
+        if (savedTime > 0 && !savedProgress.completed && savedTime < audioDuration) {
+          // Small delay to ensure audio is fully loaded
+          setTimeout(() => {
+            audio.currentTime = savedTime;
+            setCurrentTime(savedTime);
+            console.log('Resumed from saved position:', savedTime, '/', audioDuration);
+          }, 100);
         }
       }
     };
 
     const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime);
+      const currentAudioTime = audio.currentTime;
+      setCurrentTime(currentAudioTime);
       
-      // Save progress every 2 seconds (reduced frequency)
-      if (currentEpisode && Math.floor(audio.currentTime) % 2 === 0) {
-        saveProgress(audio.currentTime);
+      // Save progress every second (more frequent)
+      if (currentEpisode && Math.floor(currentAudioTime) % 1 === 0) {
+        saveProgress(currentAudioTime);
       }
     };
 
@@ -185,12 +203,18 @@ export const AudioProvider = ({ children }) => {
     if (!currentEpisode) return;
 
     const episodeId = currentEpisode.episodeId;
+    
+    // completion threshold (90%)
+    const isCompleted = completed || (duration > 0 && time >= duration * 0.90);
+    
+    console.log('Saving progress for', currentEpisode.title, ':', time, '/', duration, 'completed:', isCompleted);
+    
     setPlaybackHistory(prev => ({
       ...prev,
       [episodeId]: {
         currentTime: time,
         duration: duration,
-        completed: completed || (time >= duration * 0.95), // 95% to be considered completed
+        completed: isCompleted,
         lastListened: new Date().toISOString()
       }
     }));
@@ -202,16 +226,14 @@ export const AudioProvider = ({ children }) => {
     console.log('Playing episode:', title);
 
     if (currentEpisode?.episodeId === episodeId) {
-        console.log('Toggling play/pause for current episode');
-        return togglePlayPause();
+      console.log('Toggling play/pause for current episode');
+      return togglePlayPause();
     }
 
+    // Stop current playback if playing
     if (isPlaying && currentEpisode) {
-        audioRef.current.pause();
+      audioRef.current.pause();
     }
-    
-    // Stop current playback
-    // audioRef.current.pause();
     
     // Set new episode
     const newEpisode = {
@@ -229,34 +251,41 @@ export const AudioProvider = ({ children }) => {
     // Track in recently played
     trackRecentlyPlayed(newEpisode);
 
-    // Load and play new audio
+    // Get saved progress before loading audio
+    const savedProgress = playbackHistory[episodeId];
+    const resumeTime = savedProgress && !savedProgress.completed ? savedProgress.currentTime : 0;
+
+    console.log('Resume time for', title, ':', resumeTime);
+
+    // Load new audio
     audioRef.current.src = audioUrl;
     audioRef.current.load();
-
-    const savedProgress = playbackHistory[episodeId];
-    if (savedProgress && savedProgress.currentTime > 0) {
-      audioRef.current.currentTime = savedProgress.currentTime;
-      setCurrentTime(savedProgress.currentTime);
-      console.log('Resuming from:', savedProgress.currentTime);
-    } else {
-      audioRef.current.currentTime = 0;
-      setCurrentTime(0);
-    }
     
+    // Set the time immediately after load
+    audioRef.current.currentTime = resumeTime;
+    setCurrentTime(resumeTime);
+
+    // Play after a small delay
     setTimeout(() => {
       audioRef.current.play().then(() => {
         setIsPlaying(true);
-        console.log('Playback started successfully');
+        console.log('▶️ Playback started successfully from:', resumeTime);
       }).catch(error => {
         console.error('Playback failed:', error);
       });
-    }, 100);
+    }, 200);
   };
 
   const clearRecentlyPlayed = () => {
     console.log('Clearing recently played list');
     setRecentlyPlayed([]);
     localStorage.removeItem('recentlyPlayedEpisodes');
+  };
+
+  const debugEpisodeProgress = (episodeId) => {
+    const progress = playbackHistory[episodeId];
+    console.log('Progress for', episodeId, ':', progress);
+    return progress;
   };
 
   const togglePlayPause = () => {
@@ -320,10 +349,25 @@ export const AudioProvider = ({ children }) => {
     setRecentlyPlayed([]);
     localStorage.removeItem('playbackHistory');
     localStorage.removeItem('recentlyPlayedEpisodes');
+    console.log('Reset all history');
   };
 
   const getEpisodeProgress = (episodeId) => {
     return playbackHistory[episodeId] || null;
+  };
+
+  // Function to directly read from localStorage (for components that need immediate access)
+  const getProgressFromStorage = (episodeId) => {
+    try {
+      const savedHistory = localStorage.getItem('playbackHistory');
+      if (savedHistory) {
+        const history = JSON.parse(savedHistory);
+        return history[episodeId] || null;
+      }
+    } catch (error) {
+      console.error('Error getting progress from storage:', error);
+    }
+    return null;
   };
 
   const value = {
@@ -337,6 +381,7 @@ export const AudioProvider = ({ children }) => {
     isShuffleActive,
     playbackHistory,
     recentlyPlayed,
+    isInitialized,
     
     // Actions
     playEpisode,
@@ -351,7 +396,9 @@ export const AudioProvider = ({ children }) => {
     resetHistory,
     getEpisodeProgress,
     clearRecentlyPlayed,
-    trackRecentlyPlayed
+    debugEpisodeProgress,
+    trackRecentlyPlayed,
+    getProgressFromStorage
   };
 
   return (

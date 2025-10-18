@@ -186,15 +186,6 @@ const Favourites = () => {
         <>
             <Header onSearch={handleSearch} searchTerm={searchTerm} />
 
-            {/* Debug Button - Remove in production */}
-            {/* <button 
-                onClick={debugFavorites}
-                className="fixed top-20 right-4 z-50 bg-blue-500 text-white p-2 rounded text-sm"
-                style={{ display: 'none' }} // Hide by default, change to 'block' to see it
-            >
-                Debug Favorites
-            </button> */}
-
             <div className="h-full flex">
                 {/* Sidebar  */}
                 <div className={`

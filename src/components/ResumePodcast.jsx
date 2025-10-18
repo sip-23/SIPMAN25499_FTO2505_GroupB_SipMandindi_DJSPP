@@ -13,7 +13,10 @@ const ResumePlaylistPage = () => {
         currentEpisode, 
         isPlaying, 
         getEpisodeProgress,
-        clearRecentlyPlayed 
+        clearRecentlyPlayed,
+        playbackHistory,
+        isInitialized,
+        getProgressFromStorage
     } = useAudio();
     
     const { 
@@ -28,48 +31,122 @@ const ResumePlaylistPage = () => {
     // Debug function to check localStorage
     const debugStorage = () => {
         const savedRecentlyPlayed = localStorage.getItem('recentlyPlayedEpisodes');
+        const savedPlaybackHistory = localStorage.getItem('playbackHistory');
         console.log('DEBUG - recentlyPlayed from localStorage:', savedRecentlyPlayed);
+        console.log('DEBUG - playbackHistory from localStorage:', savedPlaybackHistory);
         console.log('DEBUG - recentlyPlayed state:', recentlyPlayed);
+        console.log('DEBUG - playbackHistory state:', playbackHistory);
         console.log('DEBUG - sortedEpisodes:', sortedEpisodes);
         console.log('DEBUG - isLoading:', isLoading);
+        console.log('DEBUG - isInitialized:', isInitialized);
     };
 
-    // Sort episodes by most recently played
-    useEffect(() => {
-        console.log('Sorting episodes, recentlyPlayed count:', recentlyPlayed.length);
+    
+    const getProgress = (episodeId) => {
         
+        const progressFromContext = getEpisodeProgress(episodeId);
+        if (progressFromContext) {
+            return progressFromContext;
+        }
+        
+        
+        const progressFromContextStorage = getProgressFromStorage(episodeId);
+        if (progressFromContextStorage) {
+            return progressFromContextStorage;
+        }
+        
+        // Final fallback: read directly from localStorage
+        try {
+            const savedHistory = localStorage.getItem('playbackHistory');
+            if (savedHistory) {
+                const history = JSON.parse(savedHistory);
+                return history[episodeId] || null;
+            }
+        } catch (error) {
+            console.error('Error getting progress from storage:', error);
+        }
+        
+        return null;
+    };
+
+    const getProgressPercentage = (episodeId) => {
+        const progress = getProgress(episodeId);
+        if (!progress || !progress.duration || progress.duration === 0) return 0;
+        return (progress.currentTime / progress.duration) * 100;
+    };
+
+    // Load and sort episodes from multiple sources
+    useEffect(() => {
         const loadAndSortEpisodes = () => {
-            if (recentlyPlayed.length > 0) {
-            const sorted = [...recentlyPlayed].sort((a, b) => {
-                const progressA = getEpisodeProgress(a.episodeId);
-                const progressB = getEpisodeProgress(b.episodeId);
+            console.log('Loading data for resume playlist...');
+            
+            let episodes = [];
+            
+            // localStorage first
+            try {
+                const savedRecentlyPlayed = localStorage.getItem('recentlyPlayedEpisodes');
+                if (savedRecentlyPlayed) {
+                    episodes = JSON.parse(savedRecentlyPlayed);
+                    console.log('Loaded episodes from localStorage:', episodes.length);
+                }
+            } catch (error) {
+                console.error('Error loading from localStorage:', error);
+            }
+            
+            // try context state if local storage is null
+            if (episodes.length === 0 && recentlyPlayed.length > 0) {
+                console.log('Using episodes from context state:', recentlyPlayed.length);
+                episodes = recentlyPlayed;
+            }
+            
+            // then show empty state
+            if (episodes.length === 0) {
+                console.log('No episodes found in any source');
+                setSortedEpisodes([]);
+                setIsLoading(false);
+                return;
+            }
+
+            // Sort episodes by most recently listened
+            const sorted = [...episodes].sort((a, b) => {
+                const progressA = getProgress(a.episodeId);
+                const progressB = getProgress(b.episodeId);
                 
                 // Sort by last listened date, most recent first
                 if (progressA && progressB) {
-                return new Date(progressB.lastListened) - new Date(progressA.lastListened);
+                    const dateA = new Date(progressA.lastListened || 0);
+                    const dateB = new Date(progressB.lastListened || 0);
+                    return dateB - dateA;
                 }
                 // If one has progress and the other doesn't, put the one with progress first
                 if (progressA && !progressB) return -1;
                 if (!progressA && progressB) return 1;
                 
+                // Fallback: use the order in the array (most recently added first)
                 return 0;
             });
+
+            console.log('Sorted episodes:', sorted.length);
             setSortedEpisodes(sorted);
-            console.log('After sorting - sortedEpisodes count:', sorted.length);
-            } else {
-            console.log('No recently played episodes found in state');
-            }
             setIsLoading(false);
         };
 
-        // Small delay to ensure state is properly set
-        const timer = setTimeout(loadAndSortEpisodes, 50);
-        return () => clearTimeout(timer);
-    }, [recentlyPlayed, getEpisodeProgress]);
+        // 
+        if (isInitialized) {
+            loadAndSortEpisodes();
+        } else {
+            const timer = setTimeout(() => {
+                console.log('AudioContext not initialized yet, loading anyway...');
+                loadAndSortEpisodes();
+            }, 1000);
+            
+            return () => clearTimeout(timer);
+        }
+    }, [isInitialized, recentlyPlayed]);
 
-    // Debug on component mount and when data changes
+    
     useEffect(() => {
-        console.log('ResumePlaylistPage mounted or data changed');
+        console.log('ResumePlaylistPage data changed');
         console.log('recentlyPlayed length:', recentlyPlayed.length);
         console.log('sortedEpisodes length:', sortedEpisodes.length);
         debugStorage();
@@ -84,7 +161,6 @@ const ResumePlaylistPage = () => {
         playEpisode(episode);
     };
 
-    // Filter episodes based on search term
     const filteredEpisodes = sortedEpisodes.filter(episode => {
         if (!searchTerm) return true;
         
@@ -101,16 +177,10 @@ const ResumePlaylistPage = () => {
     };
 
     const formatTime = (seconds) => {
-        if (!seconds) return '0:00';
+        if (!seconds || isNaN(seconds)) return '0:00';
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-    };
-
-    const getProgressPercentage = (episodeId) => {
-        const progress = getEpisodeProgress(episodeId);
-        if (!progress || !progress.duration) return 0;
-        return (progress.currentTime / progress.duration) * 100;
     };
 
     const handleClearPlaylist = () => {
@@ -127,24 +197,23 @@ const ResumePlaylistPage = () => {
         return (
             <>
                 <Header onSearch={handleSearch} searchTerm={searchTerm} />
-
                 <div className="h-full flex">
-                {/* Sidebar  */}
-                <div className={`
-                    z-40 mt-[-20px] lg:mt-0
-                    ${isMobileView ? '' : ''}
-                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-                    transition-transform duration-300 ease-in-out
-                `}>
-                    <Sidebar />
-                </div>
+                    {/* Sidebar */}
+                    <div className={`
+                        z-40 mt-[-20px] lg:mt-0
+                        ${isMobileView ? '' : ''}
+                        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                        transition-transform duration-300 ease-in-out
+                    `}>
+                        <Sidebar />
+                    </div>
             
-                {/* Main Content */}
-                <div className={`
-                    main-content flex-1 min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
-                    ${isMobileView ?  (isSidebarOpen ? 'mt-[500px]' : 'mt-0') : (isSidebarOpen ? 'lg:ml-0 lg:mt-0' : 'lg:ml-0')} 
-                    w-full
-                `}>
+                    {/* Main Content */}
+                    <div className={`
+                        main-content flex-1 min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
+                        ${isMobileView ?  (isSidebarOpen ? 'mt-[500px]' : 'mt-0') : (isSidebarOpen ? 'lg:ml-0 lg:mt-0' : 'lg:ml-0')} 
+                        w-full
+                    `}>
                         <div className="max-w-6xl mx-auto">
                             <div className="text-center py-16">
                                 <div className="w-24 h-24 mx-auto mb-4 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center">
@@ -164,14 +233,14 @@ const ResumePlaylistPage = () => {
         );
     }
 
+    
     return (
         <>
             <Header onSearch={handleSearch} searchTerm={searchTerm} />
 
-
             {/* Mobile Sidebar Overlay */}
             <div className="h-full flex">
-                {/* Sidebar  */}
+                {/* Sidebar */}
                 <div className={`
                     z-40 mt-[-20px] lg:mt-0
                     ${isMobileView ? '' : ''}
@@ -238,7 +307,7 @@ const ResumePlaylistPage = () => {
                                 <span>•</span>
                                 <span>
                                     {filteredEpisodes.filter(ep => {
-                                        const progress = getEpisodeProgress(ep.episodeId);
+                                        const progress = getProgress(ep.episodeId);
                                         return progress && progress.completed;
                                     }).length} completed
                                 </span>
@@ -291,7 +360,7 @@ const ResumePlaylistPage = () => {
                             <div className="space-y-4">
                                 {filteredEpisodes.map((episode, index) => {
                                     const isCurrentlyPlaying = currentEpisode?.episodeId === episode.episodeId && isPlaying;
-                                    const progress = getEpisodeProgress(episode.episodeId);
+                                    const progress = getProgress(episode.episodeId);
                                     const progressPercentage = getProgressPercentage(episode.episodeId);
                                     
                                     return (
@@ -380,20 +449,20 @@ const ResumePlaylistPage = () => {
                                                     : 'bg-[#65350F] hover:bg-[#7a4212] text-white'
                                                 }`}
                                                 title={isCurrentlyPlaying ? 'Pause' : 'Play'}
-                                                >
+                                            >
                                                 {isCurrentlyPlaying ? (
                                                     <>
-                                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                                        <path d="M6 4h4v16H6zM14 4h4v16h-4z"/>
-                                                    </svg>
-                                                    <span className="hidden md:inline">Pause</span>
+                                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M6 4h4v16H6zM14 4h4v16h-4z"/>
+                                                        </svg>
+                                                        <span className="hidden md:inline">Pause</span>
                                                     </>
                                                 ) : (
                                                     <>
-                                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                                        <path d="M8 5v14l11-7z"/>
-                                                    </svg>
-                                                    <span className="hidden md:inline">Play</span>
+                                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M8 5v14l11-7z"/>
+                                                        </svg>
+                                                        <span className="hidden md:inline">Play</span>
                                                     </>
                                                 )}
                                             </button>

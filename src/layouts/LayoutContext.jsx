@@ -13,19 +13,24 @@ export const useLayout = () => {
 export const LayoutProvider = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileView, setIsMobileView] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Single source of truth for sidebar state
   useEffect(() => {
     const checkMobileView = () => {
       const mobile = window.innerWidth < 1024; // lg breakpoint
+      const previousMobileView = isMobileView;
       setIsMobileView(mobile);
       
       // On mobile, use saved state or default to open
-      if (mobile) {
-        const savedSidebarState = localStorage.getItem('sidebarOpen');
-        if (savedSidebarState !== null) {
-          setIsSidebarOpen(JSON.parse(savedSidebarState));
-        }
+      if (previousMobileView !== mobile) {
+        if (mobile) {
+          const savedSidebarState = localStorage.getItem('sidebarOpen');
+            if (savedSidebarState !== null) {
+              setIsSidebarOpen(JSON.parse(savedSidebarState));
+            } else {
+              setIsSidebarOpen(false)
+            }
       } else {
         // On desktop, use saved state or default to open
         const savedSidebarState = localStorage.getItem('sidebarOpen');
@@ -37,25 +42,46 @@ export const LayoutProvider = ({ children }) => {
       }
     };
 
+    if (!isInitialized) {
+        setIsInitialized(true);
+
+        if (mobile) {
+          const savedSidebarState = localStorage.getItem('sidebarOpen');
+          if (savedSidebarState !== null) {
+            setIsSidebarOpen(JSON.parse(savedSidebarState));
+          } else {
+            setIsSidebarOpen(false);
+          }
+        } else {
+          // Desktop: use saved state or default to open
+          const savedSidebarState = localStorage.getItem('sidebarOpen');
+          if (savedSidebarState !== null) {
+            setIsSidebarOpen(JSON.parse(savedSidebarState));
+          } else {
+            setIsSidebarOpen(true);
+          }
+        }
+      }
+    };
+
     // Initial check
     checkMobileView();
 
+    let resizeTimeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(checkMobileView, 100);
+    };
+
     // Add resize listener
-    window.addEventListener('resize', checkMobileView);
+    window.addEventListener('resize', handleResize);
 
     return () => {
-      window.removeEventListener('resize', checkMobileView);
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimeout);
     };
-  }, []);
+  }, [isMobileView, isInitialized]);
 
-  // Save sidebar state to localStorage (only for desktop)
-  useEffect(() => {
-    if (!isMobileView) {
-      localStorage.setItem('sidebarOpen', JSON.stringify(isSidebarOpen));
-    }
-  }, [isSidebarOpen, isMobileView]);
-
-  // Update DOM when sidebar state changes
   useEffect(() => {
     updateSidebarDOM(isSidebarOpen);
   }, [isSidebarOpen]);
@@ -76,8 +102,17 @@ export const LayoutProvider = ({ children }) => {
     }
   };
 
+
+  // Save sidebar state to localStorage (only for desktop)
+  useEffect(() => {
+    if (isInitialized && !isMobileView) {
+      localStorage.setItem('sidebarOpen', JSON.stringify(isSidebarOpen));
+    }
+  }, [isSidebarOpen, isMobileView, isInitialized]);
+
   const toggleSidebar = () => {
     const newState = !isSidebarOpen;
+    console.log('Toggling sidebar from', isSidebarOpen, 'to', newState, 'on', isMobileView ? 'mobile' : 'desktop');
     setIsSidebarOpen(newState);
   };
 
@@ -88,6 +123,16 @@ export const LayoutProvider = ({ children }) => {
   const closeSidebar = () => {
     setIsSidebarOpen(false);
   };
+
+  useEffect(() => {
+    if (isInitialized) {
+      console.log('Sidebar State Update:', {
+        isSidebarOpen,
+        isMobileView,
+        device: isMobileView ? 'mobile/tablet' : 'desktop'
+      });
+    }
+  }, [isSidebarOpen, isMobileView, isInitialized]);
 
   return (
     <LayoutContext.Provider value={{

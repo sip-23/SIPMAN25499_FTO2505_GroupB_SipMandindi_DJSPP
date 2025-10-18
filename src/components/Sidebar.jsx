@@ -27,19 +27,19 @@ const Sidebar = () => {
     };
 
     return (
-        <aside 
+        <aside
             id="sidebar"
             className={`sidebar-visible absolute lg:relative inset-0 lg:inset-auto mx-auto sm:my-4 md:my-4 lg:my-0 
-                       w-[90vw] sm:w-[300px] md:w-[350px] lg:w-[350px] lg:h-full
-                       h-fit 
-                       dark:bg-[#121212] bg-[#ffffff] 
-                       p-5 z-40 
-                       border border-gray-300 dark:border-[#333] 
-                       transition-all duration-300 ease-in-out 
-                       rounded-b-[4px] lg:rounded-b-none
-                       shadow-m lg:shadow-none
-                       overflow-y-auto
-                       ${isMobileView ? (isSidebarOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'}
+                        w-[90vw] sm:w-[300px] md:w-[350px] lg:w-[350px] lg:h-full
+                        h-fit 
+                        dark:bg-[#121212] bg-[#ffffff] 
+                        p-5 z-40 
+                        border border-gray-300 dark:border-[#333] 
+                        rounded-b-[4px] lg:rounded-b-none
+                        shadow-m lg:shadow-none
+                        overflow-y-auto
+                        transform transition-transform duration-300 ease-in-out
+                        ${isMobileView ? (isSidebarOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'}
                        `}
         >
             {/* Close Button  */}

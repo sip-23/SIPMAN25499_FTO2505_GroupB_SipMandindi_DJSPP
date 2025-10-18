@@ -154,7 +154,8 @@ const PodcastDetail = () => {
         const [isFavorited, setIsFavorited] = useState(false);
         const { playEpisode, getEpisodeProgress, togglePlayPause, currentEpisode, isPlaying } = useAudio();
 
-        const episodeProgress = getEpisodeProgress(`${podcastData.id}-s${seasonNumber}-e${episode.episode}`);
+        const episodeId = `${podcastData.id}-s${seasonNumber}-e${episode.episode}`;
+        const episodeProgress = getEpisodeProgress(episodeId);
 
         useEffect(() => {
             // Checking if this episode is already favorited
@@ -162,15 +163,15 @@ const PodcastDetail = () => {
             if (savedFavorites) {
                 const favorites = JSON.parse(savedFavorites);
                 const isAlreadyFavorited = favorites.some(fav => 
-                    fav.episodeId === `${podcastData.id}-s${seasonNumber}-e${episode.episode}`
+                    fav.episodeId === episodeId
                 );
                 setIsFavorited(isAlreadyFavorited);
             }
-        }, [episode.episode, seasonNumber, podcastData.id]);
+        }, [episodeId]);
 
         const handlePlayEpisode = () => {
             const episodeData = {
-                episodeId: `${podcastData.id}-s${seasonNumber}-e${episode.episode}`,
+                episodeId: episodeId,
                 audioUrl: episode.file, 
                 title: episode.title,
                 season: seasonNumber,
@@ -194,13 +195,13 @@ const PodcastDetail = () => {
             return (episodeProgress.currentTime / episodeProgress.duration) * 100;
         };
 
-        const isCurrentlyPlaying = currentEpisode?.episodeId === `${podcastData.id}-s${seasonNumber}-e${episode.episode}`;
+        const isCurrentlyPlaying = currentEpisode?.episodeId === episodeId;
 
         const handleToggleFavorite = (e) => {
             e.stopPropagation();
             
             const favoriteData = {
-                episodeId: `${podcastData.id}-s${seasonNumber}-e${episode.episode}`,
+                episodeId: episodeId,
                 episodeTitle: episode.title,
                 episodeDescription: episode.description,
                 episodeNumber: episode.episode,
