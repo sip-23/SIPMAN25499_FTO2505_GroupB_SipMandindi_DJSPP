@@ -13,9 +13,7 @@ const Recommended = () => {
     // Use layout context
     const { 
         isSidebarOpen, 
-        isMobileSidebarOpen, 
-        closeMobileSidebar,
-        openMobileSidebar 
+        isMobileView
     } = useLayout();
 
     // Fetch all podcasts
@@ -108,10 +106,11 @@ const Recommended = () => {
             <Header onSearch={handleSearch} searchTerm={searchTerm}  />
 
             <div className="h-full flex">
-                {/* Sidebar - Fixed positioning */}
+                {/* Sidebar  */}
                 <div className={`
                     z-40 mt-[-20px] lg:mt-0
-                    ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                    ${isMobileView ? '' : ''}
+                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
                     transition-transform duration-300 ease-in-out
                 `}>
                     <Sidebar />
@@ -120,7 +119,7 @@ const Recommended = () => {
                 {/* Main Content */}
                 <div className={`
                     main-content flex-1 min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
-                    ${isSidebarOpen ? 'mt-[500px] lg:ml-0 lg:mt-0' : ''}
+                    ${isMobileView ?  (isSidebarOpen ? 'mt-[500px]' : 'mt-0') : (isSidebarOpen ? 'lg:ml-0 lg:mt-0' : 'lg:ml-0')} 
                     w-full
                 `}>
                     <div className="w-full">

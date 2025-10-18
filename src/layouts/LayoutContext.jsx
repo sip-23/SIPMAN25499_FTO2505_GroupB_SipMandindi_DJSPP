@@ -12,29 +12,58 @@ export const useLayout = () => {
 
 export const LayoutProvider = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(false);
 
-  // Initialize sidebar state from localStorage
+  // Single source of truth for sidebar state
   useEffect(() => {
-    const savedSidebarState = localStorage.getItem('sidebarOpen');
-    if (savedSidebarState !== null) {
-      setIsSidebarOpen(JSON.parse(savedSidebarState));
-    }
+    const checkMobileView = () => {
+      const mobile = window.innerWidth < 1024; // lg breakpoint
+      setIsMobileView(mobile);
+      
+      // On mobile, use saved state or default to open
+      if (mobile) {
+        const savedSidebarState = localStorage.getItem('sidebarOpen');
+        if (savedSidebarState !== null) {
+          setIsSidebarOpen(JSON.parse(savedSidebarState));
+        }
+      } else {
+        // On desktop, use saved state or default to open
+        const savedSidebarState = localStorage.getItem('sidebarOpen');
+        if (savedSidebarState !== null) {
+          setIsSidebarOpen(JSON.parse(savedSidebarState));
+        } else {
+          setIsSidebarOpen(true); // Default to open on desktop
+        }
+      }
+    };
+
+    // Initial check
+    checkMobileView();
+
+    // Add resize listener
+    window.addEventListener('resize', checkMobileView);
+
+    return () => {
+      window.removeEventListener('resize', checkMobileView);
+    };
   }, []);
 
-  // Save sidebar state to localStorage
+  // Save sidebar state to localStorage (only for desktop)
   useEffect(() => {
-    localStorage.setItem('sidebarOpen', JSON.stringify(isSidebarOpen));
+    if (!isMobileView) {
+      localStorage.setItem('sidebarOpen', JSON.stringify(isSidebarOpen));
+    }
+  }, [isSidebarOpen, isMobileView]);
+
+  // Update DOM when sidebar state changes
+  useEffect(() => {
+    updateSidebarDOM(isSidebarOpen);
   }, [isSidebarOpen]);
 
-  const toggleSidebar = () => {
-    const newState = !isSidebarOpen;
-    setIsSidebarOpen(newState);
-    
-    // Update DOM classes for transitions
+  const updateSidebarDOM = (isOpen) => {
     const sidebar = document.getElementById('sidebar');
     if (sidebar) {
-      if (newState) {
+      if (isOpen) {
         sidebar.classList.remove('sidebar-hidden', 'hidden');
         sidebar.classList.add('sidebar-visible', 'block');
       } else {
@@ -47,70 +76,24 @@ export const LayoutProvider = ({ children }) => {
     }
   };
 
-  const closeMobileSidebar = () => {
-    setIsMobileSidebarOpen(false);
-    setIsSidebarOpen(false);
-    
-    const sidebar = document.getElementById('sidebar');
-    if (sidebar) {
-      sidebar.classList.remove('sidebar-visible', 'block');
-      sidebar.classList.add('sidebar-hidden');
-      setTimeout(() => {
-        sidebar.classList.add('hidden');
-      }, 300);
-    }
+  const toggleSidebar = () => {
+    const newState = !isSidebarOpen;
+    setIsSidebarOpen(newState);
   };
 
-  const openMobileSidebar = () => {
-    setIsMobileSidebarOpen(true);
-    setIsSidebarOpen(true);
-    
-    const sidebar = document.getElementById('sidebar');
-    if (sidebar) {
-      sidebar.classList.remove('sidebar-hidden', 'hidden');
-      sidebar.classList.add('sidebar-visible', 'block');
-    }
-  };
-
-  // Add this function to handle mobile sidebar toggle
-  const toggleMobileSidebar = () => {
-    if (isMobileSidebarOpen) {
-      closeMobileSidebar();
-    } else {
-      openMobileSidebar();
-    }
-  };
-
-  // Add these functions for explicit sidebar control
   const openSidebar = () => {
     setIsSidebarOpen(true);
-    const sidebar = document.getElementById('sidebar');
-    if (sidebar) {
-      sidebar.classList.remove('sidebar-hidden', 'hidden');
-      sidebar.classList.add('sidebar-visible', 'block');
-    }
   };
 
   const closeSidebar = () => {
     setIsSidebarOpen(false);
-    const sidebar = document.getElementById('sidebar');
-    if (sidebar) {
-      sidebar.classList.remove('sidebar-visible', 'block');
-      sidebar.classList.add('sidebar-hidden');
-      setTimeout(() => {
-        sidebar.classList.add('hidden');
-      }, 300);
-    }
   };
 
   return (
     <LayoutContext.Provider value={{
       isSidebarOpen,
-      isMobileSidebarOpen,
+      isMobileView,
       toggleSidebar,
-      closeMobileSidebar,
-      openMobileSidebar,
-      toggleMobileSidebar,
       openSidebar,
       closeSidebar
     }}>

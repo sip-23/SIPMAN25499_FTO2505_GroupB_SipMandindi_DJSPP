@@ -18,7 +18,7 @@ const ResumePlaylistPage = () => {
     
     const { 
         isSidebarOpen, 
-        isMobileSidebarOpen 
+        isMobileView
     } = useLayout();
 
     const [sortedEpisodes, setSortedEpisodes] = useState([]);
@@ -127,19 +127,24 @@ const ResumePlaylistPage = () => {
         return (
             <>
                 <Header onSearch={handleSearch} searchTerm={searchTerm} />
+
                 <div className="h-full flex">
-                    <div className={`
-                        z-40 mt-[-20px] lg:mt-0
-                        ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-                        transition-transform duration-300 ease-in-out
-                    `}>
-                        <Sidebar />
-                    </div>
-                    <div className={`
-                        flex-1 min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
-                        ${isSidebarOpen ? 'mt-[500px] lg:ml-0 lg:mt-0' : 'lg:ml-0'}
-                        w-full
-                    `}>
+                {/* Sidebar  */}
+                <div className={`
+                    z-40 mt-[-20px] lg:mt-0
+                    ${isMobileView ? '' : ''}
+                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                    transition-transform duration-300 ease-in-out
+                `}>
+                    <Sidebar />
+                </div>
+            
+                {/* Main Content */}
+                <div className={`
+                    main-content flex-1 min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
+                    ${isMobileView ?  (isSidebarOpen ? 'mt-[500px]' : 'mt-0') : (isSidebarOpen ? 'lg:ml-0 lg:mt-0' : 'lg:ml-0')} 
+                    w-full
+                `}>
                         <div className="max-w-6xl mx-auto">
                             <div className="text-center py-16">
                                 <div className="w-24 h-24 mx-auto mb-4 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center">
@@ -163,21 +168,14 @@ const ResumePlaylistPage = () => {
         <>
             <Header onSearch={handleSearch} searchTerm={searchTerm} />
 
-            {/* Debug Button - Remove in production */}
-            <button 
-                onClick={debugStorage}
-                className="fixed top-20 right-4 z-50 bg-blue-500 text-white p-2 rounded text-sm"
-                style={{ display: 'block' }} // Change to 'none' to hide in production
-            >
-                Debug Storage
-            </button>
 
             {/* Mobile Sidebar Overlay */}
             <div className="h-full flex">
-                {/* Sidebar - Fixed positioning */}
+                {/* Sidebar  */}
                 <div className={`
                     z-40 mt-[-20px] lg:mt-0
-                    ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                    ${isMobileView ? '' : ''}
+                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
                     transition-transform duration-300 ease-in-out
                 `}>
                     <Sidebar />
@@ -185,8 +183,8 @@ const ResumePlaylistPage = () => {
             
                 {/* Main Content */}
                 <div className={`
-                    flex-1 min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
-                    ${isSidebarOpen ? 'mt-[500px] lg:ml-0 lg:mt-0' : 'lg:ml-0'}
+                    main-content flex-1 min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
+                    ${isMobileView ?  (isSidebarOpen ? 'mt-[500px]' : 'mt-0') : (isSidebarOpen ? 'lg:ml-0 lg:mt-0' : 'lg:ml-0')} 
                     w-full
                 `}>
                     <div className="max-w-6xl mx-auto">

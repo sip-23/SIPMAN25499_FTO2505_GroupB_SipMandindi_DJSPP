@@ -7,13 +7,13 @@ const Sidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { darkMode, toggleTheme } = useTheme();
-    const { closeMobileSidebar } = useLayout();
+    const { closeSidebar, isMobileView, isSidebarOpen } = useLayout();
 
     const handleNavigation = (path) => {
         navigate(path);
-        // Close mobile sidebar on navigation
-        if (window.innerWidth < 1024) {
-            closeMobileSidebar();
+        // Close sidebar on mobile navigation
+        if (isMobileView) {
+            closeSidebar();
         }
     };
 
@@ -22,7 +22,6 @@ const Sidebar = () => {
         toggleTheme();
     };
 
-
     const isActive = (path) => {
         return location.pathname === path;
     };
@@ -30,7 +29,7 @@ const Sidebar = () => {
     return (
         <aside 
             id="sidebar"
-            className="sidebar-visible absolute lg:relative inset-0 lg:inset-auto mx-auto sm:my-4 md:my-4 lg:my-0 
+            className={`sidebar-visible absolute lg:relative inset-0 lg:inset-auto mx-auto sm:my-4 md:my-4 lg:my-0 
                        w-[90vw] sm:w-[300px] md:w-[350px] lg:w-[350px] lg:h-full
                        h-fit 
                        dark:bg-[#121212] bg-[#ffffff] 
@@ -39,8 +38,20 @@ const Sidebar = () => {
                        transition-all duration-300 ease-in-out 
                        rounded-b-[4px] lg:rounded-b-none
                        shadow-m lg:shadow-none
-                       overflow-y-auto"
+                       overflow-y-auto
+                       ${isMobileView ? (isSidebarOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'}
+                       `}
         >
+            {/* Close Button  */}
+            <button 
+                onClick={closeSidebar}
+                className="absolute top-4 right-4 p-2"
+            >
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+            </button>
+
             <div className="w-full flex flex-col">
                 {/* Home */}
                 <button 
@@ -58,7 +69,7 @@ const Sidebar = () => {
                     </div>
                 </button>
 
-                {/* favourites */}
+                {/* Favourites */}
                 <button 
                     onClick={() => handleNavigation('/favourites')}
                     className={`flex items-center w-full h-[55px] ml-[-40px] gap-3 cursor-pointer rounded-full transition-colors ${

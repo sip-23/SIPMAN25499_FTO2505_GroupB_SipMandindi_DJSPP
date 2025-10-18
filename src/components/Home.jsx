@@ -23,9 +23,7 @@ const Home = () => {
     // Using layout context instead of of local state
     const { 
         isSidebarOpen, 
-        isMobileSidebarOpen,
-        sidebarHeight,
-        closeMobileSidebar 
+        isMobileView
     } = useLayout();
 
     // Fetch all podcasts
@@ -173,10 +171,11 @@ const Home = () => {
             />
 
             <div className="h-full flex">
-                {/* Sidebar - Fixed positioning */}
+                {/* Sidebar  */}
                 <div className={`
                     z-40 mt-[-20px] lg:mt-0
-                    ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                    ${isMobileView ? '' : ''}
+                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
                     transition-transform duration-300 ease-in-out
                 `}>
                     <Sidebar />
@@ -185,7 +184,7 @@ const Home = () => {
                 {/* Main Content */}
                 <div className={`
                     main-content flex-1 min-h-screen transition-all duration-300 dark:text-white text-[#000] dark:bg-[#1a1a1a] bg-[#F4F4F4] p-4 lg:p-6
-                    ${isSidebarOpen ? 'mt-[500px] lg:ml-0 lg:mt-0' : ''} 
+                    ${isMobileView ?  (isSidebarOpen ? 'mt-[500px]' : 'mt-0') : (isSidebarOpen ? 'lg:ml-0 lg:mt-0' : 'lg:ml-0')} 
                     w-full
                 `}>
                     <div className="max-w-6xl mx-auto flex items-center flex-col gap-8">
