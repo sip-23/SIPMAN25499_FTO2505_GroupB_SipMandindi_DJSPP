@@ -34,25 +34,67 @@ const HomeRenderRow = ({ title, allPodcasts, onPodcastSelect }) => {
         }
     }, [allPodcasts, title]);
 
-    // Clear session storage when component unmounts or on page refresh
-    useEffect(() => {
-        return () => {
-            
-        };
-    }, []);
-
-    // Scroll functions (same as your existing RenderRow)
+    // Calculate dynamic scroll amount based on card width
     const getScrollAmount = () => {
-        if (typeof window === 'undefined') return 300;
+        const cardWidth = getCardWidth();
+        const visibleCards = getVisibleCardCount();
+        return cardWidth * visibleCards * 0.8; // Scroll 80% of visible area
+    };
+
+    // Calculate card width based on screen size and sidebar state
+    const getCardWidth = () => {
+        if (typeof window === 'undefined') return 280;
         
         const screenWidth = window.innerWidth;
-        if (screenWidth < 768) {
-            return 280;
-        } else if (screenWidth < 1024) {
-            return isSidebarOpen ? 320 : 350;
-        } else {
-            return isSidebarOpen ? 350 : 400;
+        if (screenWidth < 640) { // Mobile
+            return screenWidth - 80; // Full width minus padding
+        } else if (screenWidth < 768) { // Small tablet
+            return 300;
+        } else if (screenWidth < 1024) { // Tablet
+            return isSidebarOpen ? 280 : 240;
+        } else { // Desktop
+            return isSidebarOpen ? 260 : 260;
         }
+    };
+
+    // Calculate number of visible cards based on sidebar state
+    const getVisibleCardCount = () => {
+        if (typeof window === 'undefined') return 3;
+        
+        const screenWidth = window.innerWidth;
+        if (screenWidth < 640) {
+            return 1; // Mobile: show 1 card
+        } else if (screenWidth < 768) {
+            return 1.5; // Small tablet: show 1.5 cards (peek)
+        } else if (screenWidth < 1024) {
+            return isSidebarOpen ? 2.2 : 2.8; // Tablet
+        } else {
+            return isSidebarOpen ? 3.2 : 3.8; // Desktop
+        }
+    };
+
+    // Calculate gap size based on screen size
+    const getGapSize = () => {
+        if (typeof window === 'undefined') return 16;
+        
+        const screenWidth = window.innerWidth;
+        if (screenWidth < 640) return 12; // Mobile
+        if (screenWidth < 768) return 14; // Small tablet
+        if (screenWidth < 1024) return 16; // Tablet
+        if (screenWidth < 1440) return 18; // Laptop
+        return 20; // Desktop
+    };
+
+    // Calculate container padding based on screen size
+    const getContainerPadding = () => {
+        if (typeof window === 'undefined') return 'px-4';
+        
+        const screenWidth = window.innerWidth;
+        if (screenWidth < 640) return 'px-4'; // Mobile
+        if (screenWidth < 768) return 'px-4'; // Small tablet
+        if (screenWidth < 1024) return 'px-6'; // Tablet
+        if (screenWidth < 1440) return 'px-7'; // laptop
+        return 'px-8'; // Desktop
     };
 
     const scrollRight = () => {
@@ -100,29 +142,38 @@ const HomeRenderRow = ({ title, allPodcasts, onPodcastSelect }) => {
     const updateButtonVisibility = () => {
         if (scrollContainerRef.current) {
             const container = scrollContainerRef.current;
-            setShowLeftButton(true);
-            setShowRightButton(true);
+            const scrollLeft = container.scrollLeft;
+            const scrollWidth = container.scrollWidth;
+            const clientWidth = container.clientWidth;
+            
+            // Show buttons based on scroll position
+            setShowLeftButton(scrollLeft > 10);
+            setShowRightButton(scrollLeft < (scrollWidth - clientWidth - 10));
         }
     };
 
-    const getVisibleCardCount = () => {
-        if (typeof window === 'undefined') return 3;
+    // Get dynamic styles for cards
+    const getCardStyles = () => {
+        const cardWidth = getCardWidth();
+        const gapSize = getGapSize();
+        
+        return {
+            minWidth: `${cardWidth}px`,
+            maxWidth: `${cardWidth}px`,
+            marginRight: `${gapSize}px`
+        };
+    };
+
+    // Get container max width based on sidebar state
+    const getContainerMaxWidth = () => {
+        if (typeof window === 'undefined') return '100%';
         
         const screenWidth = window.innerWidth;
-        if (screenWidth < 768) {
-            return 1;
-        } else if (screenWidth < 1024) {
-            return isSidebarOpen ? 2 : 3;
+        if (screenWidth < 1024) {
+            return '100%';
         } else {
-            return isSidebarOpen ? 3 : 4;
+            return isSidebarOpen ? 'calc(100vw - 25rem)' : '100%';
         }
-    };
-
-    const getContainerPadding = () => {
-        const visibleCards = getVisibleCardCount();
-        if (visibleCards >= 4) return 'px-2';
-        if (visibleCards === 3) return 'px-4';
-        return 'px-6';
     };
 
     useEffect(() => {
@@ -144,28 +195,44 @@ const HomeRenderRow = ({ title, allPodcasts, onPodcastSelect }) => {
         return () => clearTimeout(timer);
     }, [randomizedPodcasts, isSidebarOpen]);
 
+    // Handle keyboard navigation
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'ArrowLeft') {
+                scrollLeft();
+            } else if (e.key === 'ArrowRight') {
+                scrollRight();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
     if (!randomizedPodcasts || randomizedPodcasts.length === 0) {
         return null;
     }
 
-    const visibleCardCount = getVisibleCardCount();
     const containerPadding = getContainerPadding();
+    const gapSize = getGapSize();
+    const containerMaxWidth = getContainerMaxWidth();
 
     return (
-        <div className="flex flex-col mb-8 lg:w-[92%] w-full">
-            <h1 className="text-2xl font-bold text-black dark:text-white mb-4 px-4">
+        <div className="flex flex-col mb-8 w-full">
+            <h1 className="text-2xl font-bold text-black dark:text-white mb-4 px-4 md:px-6">
                 {title}
                 <span className="text-sm text-gray-500 ml-2 font-normal">
                     ({randomizedPodcasts.length} shows)
                 </span>
             </h1>
             
-            <div className="flex items-center relative group">
+            <div className="flex items-center relative group w-full">
+                {/* Left Scroll Button */}
                 <button 
                     onClick={scrollLeft}
-                    className={`absolute left-0 z-10 p-3 bg-black bg-opacity-70 rounded-full hover:bg-opacity-90 
-                              transition-all duration-200 ml-2 transform hover:scale-110
-                              ${showLeftButton ? 'opacity-100' : 'opacity-40 cursor-not-allowed'}`}
+                    className={`absolute left-0 z-10 p-2 md:p-3 bg-black bg-opacity-70 rounded-full hover:bg-opacity-90 
+                              transition-all duration-200 ml-2 md:ml-4 transform hover:scale-110
+                              ${showLeftButton ? 'opacity-100' : 'opacity-0 cursor-not-allowed'}`}
                     aria-label="Scroll left"
                     disabled={!showLeftButton}
                 >
@@ -174,24 +241,23 @@ const HomeRenderRow = ({ title, allPodcasts, onPodcastSelect }) => {
                     </svg>
                 </button>
 
+                {/* Podcasts Container */}
                 <div 
                     ref={scrollContainerRef}
-                    className={`flex items-center gap-4 w-full overflow-x-auto scrollbar-hide scroll-smooth py-3 ${containerPadding}
+                    className={`flex items-start w-full overflow-x-auto scrollbar-hide scroll-smooth py-3 ${containerPadding}
                               transition-all duration-300 ease-in-out`}
                     style={{ 
                         scrollbarWidth: 'none', 
                         msOverflowStyle: 'none',
-                        maxWidth: isSidebarOpen ? 'calc(100vw - 25rem)' : '100vw'
+                        gap: `${gapSize}px`,
+                        maxWidth: containerMaxWidth
                     }}
                 >
                     {randomizedPodcasts.map((podcast) => (
                         <div 
                             key={podcast.id} 
                             className="flex-shrink-0 transition-transform duration-200 hover:scale-105"
-                            style={{
-                                minWidth: `calc(${100 / visibleCardCount}% - 1rem)`,
-                                maxWidth: `calc(${100 / visibleCardCount}% - 1rem)`
-                            }}
+                            style={getCardStyles()}
                         >
                             <PodcastCard
                                 podcast={podcast}
@@ -201,11 +267,12 @@ const HomeRenderRow = ({ title, allPodcasts, onPodcastSelect }) => {
                     ))}
                 </div>
 
+                {/* Right Scroll Button */}
                 <button 
                     onClick={scrollRight}
-                    className={`absolute right-0 z-10 p-3 bg-black bg-opacity-70 rounded-full hover:bg-opacity-90 
-                              transition-all duration-200 mr-2 transform hover:scale-110
-                              ${showRightButton ? 'opacity-100' : 'opacity-40 cursor-not-allowed'}`}
+                    className={`absolute right-0 z-10 p-2 md:p-3 bg-black bg-opacity-70 rounded-full hover:bg-opacity-90 
+                              transition-all duration-200 mr-2 md:mr-4 transform hover:scale-110
+                              ${showRightButton ? 'opacity-100' : 'opacity-0 cursor-not-allowed'}`}
                     aria-label="Scroll right"
                     disabled={!showRightButton}
                 >
@@ -213,6 +280,16 @@ const HomeRenderRow = ({ title, allPodcasts, onPodcastSelect }) => {
                         <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
                     </svg>
                 </button>
+
+                {/* Scroll indicators */}
+                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    {Array.from({ length: Math.min(5, randomizedPodcasts.length) }).map((_, index) => (
+                        <div 
+                            key={index}
+                            className="w-2 h-2 bg-gray-400 rounded-full opacity-50"
+                        />
+                    ))}
+                </div>
             </div>
         </div>
     );

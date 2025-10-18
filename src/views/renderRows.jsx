@@ -12,23 +12,18 @@ const RenderRow = ({ title, podcasts, onPodcastSelect, isRecommendationRow = fal
     const displayPodcasts = useMemo(() => {
         if (!podcasts || podcasts.length === 0) return [];
         
-        // For recommendation rows, use randomization with session persistence
         if (isRecommendationRow) {
-            // Get or create session key for persistence
             const sessionKey = `recommendation_randomized_${title.replace(/\s+/g, '_').toLowerCase()}`;
             const stored = sessionStorage.getItem(sessionKey);
             
             if (stored) {
-                // Use stored randomized order for this session
                 const storedIds = JSON.parse(stored);
                 return storedIds.map(id => podcasts.find(podcast => podcast.id === id)).filter(Boolean);
             } else {
-                // Create new randomized order, limit to 10 podcasts for recommendations
                 const shuffled = [...podcasts]
                     .sort(() => Math.random() - 0.5)
                     .slice(0, 10);
                 
-                // Store the IDs in sessionStorage
                 const podcastIds = shuffled.map(podcast => podcast.id);
                 sessionStorage.setItem(sessionKey, JSON.stringify(podcastIds));
                 
@@ -36,21 +31,79 @@ const RenderRow = ({ title, podcasts, onPodcastSelect, isRecommendationRow = fal
             }
         }
         
-        // For non-recommendation rows, return original podcasts
         return podcasts;
     }, [podcasts, title, isRecommendationRow]);
 
-    // Calculate dynamic scroll amount based on sidebar state and screen size
+    // Calculate dynamic scroll amount based on card width
     const getScrollAmount = () => {
-        if (typeof window === 'undefined') return 300;
+        const cardWidth = getCardWidth();
+        const visibleCards = getVisibleCardCount();
+        return cardWidth * visibleCards * 0.8; // Scroll 80% of visible area
+    };
+
+    // Calculate card width based on screen size and sidebar state
+    const getCardWidth = () => {
+        if (typeof window === 'undefined') return 280;
         
         const screenWidth = window.innerWidth;
-        if (screenWidth < 768) {
-            return 280; // Mobile
+        if (screenWidth < 640) { // Mobile
+            return screenWidth - 80; // Full width minus padding
+        } else if (screenWidth < 768) { // Small tablet
+            return 300;
+        } else if (screenWidth < 1024) { // Tablet
+            return isSidebarOpen ? 280 : 240;
+        } else { // Desktop
+            return isSidebarOpen ? 260 : 220;
+        }
+    };
+
+    // Calculate number of visible cards based on sidebar state
+    const getVisibleCardCount = () => {
+        if (typeof window === 'undefined') return 3;
+        
+        const screenWidth = window.innerWidth;
+        if (screenWidth < 640) {
+            return 1; // Mobile: show 1 card
+        } else if (screenWidth < 768) {
+            return 1.5; // Small tablet: show 1.5 cards (peek)
         } else if (screenWidth < 1024) {
-            return isSidebarOpen ? 320 : 350; // Tablet
+            return isSidebarOpen ? 2.2 : 2.8; // Tablet
         } else {
-            return isSidebarOpen ? 350 : 400; // Desktop
+            return isSidebarOpen ? 3.2 : 4.2; // Desktop
+        }
+    };
+
+    // Calculate gap size based on screen size
+    const getGapSize = () => {
+        if (typeof window === 'undefined') return 16;
+        
+        const screenWidth = window.innerWidth;
+        if (screenWidth < 640) return 12; // Mobile
+        if (screenWidth < 768) return 14; // Small tablet
+        if (screenWidth < 1024) return 16; // Tablet
+        return 20; // Desktop
+    };
+
+    // Calculate container padding based on screen size
+    const getContainerPadding = () => {
+        if (typeof window === 'undefined') return 'px-4';
+        
+        const screenWidth = window.innerWidth;
+        if (screenWidth < 640) return 'px-4'; // Mobile
+        if (screenWidth < 768) return 'px-4'; // Small tablet
+        if (screenWidth < 1024) return 'px-6'; // Tablet
+        return 'px-8'; // Desktop
+    };
+
+    // Get container max width based on sidebar state
+    const getContainerMaxWidth = () => {
+        if (typeof window === 'undefined') return '100%';
+        
+        const screenWidth = window.innerWidth;
+        if (screenWidth < 1024) {
+            return '100%';
+        } else {
+            return isSidebarOpen ? 'calc(100vw - 25rem)' : '100%';
         }
     };
 
@@ -59,17 +112,14 @@ const RenderRow = ({ title, podcasts, onPodcastSelect, isRecommendationRow = fal
             const container = scrollContainerRef.current;
             const scrollAmount = getScrollAmount();
             
-            // Check if we're at the end
             const isAtEnd = container.scrollLeft >= (container.scrollWidth - container.clientWidth - 10);
             
             if (isAtEnd) {
-                // Loop back to start
                 container.scrollTo({
                     left: 0,
                     behavior: 'smooth'
                 });
             } else {
-                // Normal scroll
                 container.scrollBy({
                     left: scrollAmount,
                     behavior: 'smooth'
@@ -83,17 +133,14 @@ const RenderRow = ({ title, podcasts, onPodcastSelect, isRecommendationRow = fal
             const container = scrollContainerRef.current;
             const scrollAmount = getScrollAmount();
             
-            // Check if we're at the beginning
             const isAtStart = container.scrollLeft <= 10;
             
             if (isAtStart) {
-                // Loop to end
                 container.scrollTo({
                     left: container.scrollWidth,
                     behavior: 'smooth'
                 });
             } else {
-                // Normal scroll
                 container.scrollBy({
                     left: -scrollAmount,
                     behavior: 'smooth'
@@ -109,32 +156,22 @@ const RenderRow = ({ title, podcasts, onPodcastSelect, isRecommendationRow = fal
             const scrollWidth = container.scrollWidth;
             const clientWidth = container.clientWidth;
             
-            // Always show both buttons for continuous loop, but adjust opacity based on position
-            setShowLeftButton(true);
-            setShowRightButton(true);
+            // Show buttons based on scroll position
+            setShowLeftButton(scrollLeft > 10);
+            setShowRightButton(scrollLeft < (scrollWidth - clientWidth - 10));
         }
     };
 
-    // Calculate number of visible cards based on sidebar state
-    const getVisibleCardCount = () => {
-        if (typeof window === 'undefined') return 3;
+    // Get dynamic styles for cards
+    const getCardStyles = () => {
+        const cardWidth = getCardWidth();
+        const gapSize = getGapSize();
         
-        const screenWidth = window.innerWidth;
-        if (screenWidth < 768) {
-            return 1; // Mobile: show 1 card
-        } else if (screenWidth < 1024) {
-            return isSidebarOpen ? 2 : 3; // Tablet: 2 with sidebar, 3 without
-        } else {
-            return isSidebarOpen ? 3 : 4; // Desktop: 3 with sidebar, 4 without
-        }
-    };
-
-    // Adjust container padding based on visible cards
-    const getContainerPadding = () => {
-        const visibleCards = getVisibleCardCount();
-        if (visibleCards >= 4) return 'px-2';
-        if (visibleCards === 3) return 'px-4';
-        return 'px-6';
+        return {
+            minWidth: `${cardWidth}px`,
+            maxWidth: `${cardWidth}px`,
+            marginRight: `${gapSize}px`
+        };
     };
 
     useEffect(() => {
@@ -143,7 +180,6 @@ const RenderRow = ({ title, podcasts, onPodcastSelect, isRecommendationRow = fal
             container.addEventListener('scroll', updateButtonVisibility);
             window.addEventListener('resize', updateButtonVisibility);
             
-            // Initial check
             updateButtonVisibility();
 
             return () => {
@@ -153,13 +189,11 @@ const RenderRow = ({ title, podcasts, onPodcastSelect, isRecommendationRow = fal
         }
     }, [displayPodcasts, isSidebarOpen]);
 
-    // Reset and update when sidebar state changes
     useEffect(() => {
         const timer = setTimeout(updateButtonVisibility, 300);
         return () => clearTimeout(timer);
     }, [displayPodcasts, isSidebarOpen]);
 
-    // Handle keyboard navigation
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'ArrowLeft') {
@@ -177,25 +211,26 @@ const RenderRow = ({ title, podcasts, onPodcastSelect, isRecommendationRow = fal
         return null;
     }
 
-    const visibleCardCount = getVisibleCardCount();
     const containerPadding = getContainerPadding();
+    const gapSize = getGapSize();
+    const containerMaxWidth = getContainerMaxWidth();
 
     return (
         <div className="flex flex-col mb-8 w-full">
-            <h1 className="text-2xl font-bold text-black dark:text-white mb-4 px-4">
+            <h1 className="text-2xl font-bold text-black dark:text-white mb-4 px-4 md:px-6">
                 {title}
                 <span className="text-sm text-gray-500 ml-2 font-normal">
                     ({displayPodcasts.length} {isRecommendationRow ? 'recommended' : 'shows'})
                 </span>
             </h1>
             
-            <div className="flex items-center relative group">
-                {/* Left Scroll Button with improved styling */}
+            <div className="flex items-center relative group w-full">
+                {/* Left Scroll Button */}
                 <button 
                     onClick={scrollLeft}
-                    className={`absolute left-0 z-10 p-3 bg-black bg-opacity-70 rounded-full hover:bg-opacity-90 
-                              transition-all duration-200 ml-2 transform hover:scale-110
-                              ${showLeftButton ? 'opacity-100' : 'opacity-40 cursor-not-allowed'}`}
+                    className={`absolute left-0 z-10 p-2 md:p-3 bg-black bg-opacity-70 rounded-full hover:bg-opacity-90 
+                              transition-all duration-200 ml-2 md:ml-4 transform hover:scale-110
+                              ${showLeftButton ? 'opacity-100' : 'opacity-0 cursor-not-allowed'}`}
                     aria-label="Scroll left"
                     disabled={!showLeftButton}
                 >
@@ -204,27 +239,23 @@ const RenderRow = ({ title, podcasts, onPodcastSelect, isRecommendationRow = fal
                     </svg>
                 </button>
 
-                {/* Podcasts Container with dynamic sizing */}
+                {/* Podcasts Container with fixed pixel widths */}
                 <div 
                     ref={scrollContainerRef}
-                    className={`flex items-center gap-4 w-full overflow-x-auto scrollbar-hide scroll-smooth py-3 ${containerPadding}
+                    className={`flex items-start w-full overflow-x-auto scrollbar-hide scroll-smooth py-3 ${containerPadding}
                               transition-all duration-300 ease-in-out`}
                     style={{ 
                         scrollbarWidth: 'none', 
                         msOverflowStyle: 'none',
-                        // Dynamic max width based on sidebar state
-                        maxWidth: isSidebarOpen ? 'calc(100vw - 25rem)' : '100vw'
+                        gap: `${gapSize}px`,
+                        maxWidth: containerMaxWidth
                     }}
                 >
                     {displayPodcasts.map((podcast, index) => (
                         <div 
                             key={podcast.id} 
                             className="flex-shrink-0 transition-transform duration-200 hover:scale-105"
-                            style={{
-                                // Dynamic card width based on visible count
-                                minWidth: `calc(${100 / visibleCardCount}% - 1rem)`,
-                                maxWidth: `calc(${100 / visibleCardCount}% - 1rem)`
-                            }}
+                            style={getCardStyles()}
                         >
                             <PodcastCard
                                 podcast={podcast}
@@ -234,12 +265,12 @@ const RenderRow = ({ title, podcasts, onPodcastSelect, isRecommendationRow = fal
                     ))}
                 </div>
 
-                {/* Right Scroll Button with improved styling */}
+                {/* Right Scroll Button */}
                 <button 
                     onClick={scrollRight}
-                    className={`absolute right-0 z-10 p-3 bg-black bg-opacity-70 rounded-full hover:bg-opacity-90 
-                              transition-all duration-200 mr-2 transform hover:scale-110
-                              ${showRightButton ? 'opacity-100' : 'opacity-40 cursor-not-allowed'}`}
+                    className={`absolute right-0 z-10 p-2 md:p-3 bg-black bg-opacity-70 rounded-full hover:bg-opacity-90 
+                              transition-all duration-200 mr-2 md:mr-4 transform hover:scale-110
+                              ${showRightButton ? 'opacity-100' : 'opacity-0 cursor-not-allowed'}`}
                     aria-label="Scroll right"
                     disabled={!showRightButton}
                 >

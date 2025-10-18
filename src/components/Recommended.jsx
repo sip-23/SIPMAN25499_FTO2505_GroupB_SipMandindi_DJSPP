@@ -123,7 +123,7 @@ const Recommended = () => {
                     ${isSidebarOpen ? 'mt-[500px] lg:ml-0 lg:mt-0' : ''}
                     w-full
                 `}>
-                    <div className="max-w-6xl mx-auto">
+                    <div className="w-full">
                         <h1 className="text-3xl font-bold text-black dark:text-white mb-6">Recommended For You</h1>
 
                         
