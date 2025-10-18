@@ -229,8 +229,8 @@ const PodcastDetail = () => {
         return (
             <div className="hover:ring-[#9D610E] hover:ring-4 bg-[#fff] flex items-center justify-between p-4 dark:bg-[#181818] rounded-lg dark:hover:bg-[#282828] transition-colors mb-3">
                 <div className="flex items-center space-x-4 flex-1 w-[50%]">
-                    <div className="flex-shrink-0 w-8 text-center">
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                    <div className="lg:flex-shrink-0 lg:w-8 lg:text-center">
+                        <span className="hidden lg:text-sm lg:text-gray-500 lg:dark:text-gray-400">
                             {index + 1}
                         </span>
                     </div>
@@ -298,21 +298,21 @@ const PodcastDetail = () => {
                     {/* Play Button */}
                     <button
                         onClick={handlePlayEpisode}
-                        className="ml-4 flex items-center space-x-2 bg-[#65350F] hover:bg-[#1ed760] text-white px-4 py-2 rounded-full text-sm font-medium transition-colors min-w-[120px] justify-center"
+                        className="ml-4 flex items-center space-x-2 bg-[#65350F] hover:bg-[#1ed760] text-white px-4 py-4 md:py-2 rounded-full text-sm font-medium transition-colors md:min-w-[120px] justify-center"
                     >
                         {isCurrentlyPlaying && isPlaying ? (
                             <>
                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M6 4h4v16H6zM14 4h4v16h-4z"/>
                                 </svg>
-                                <span>Pause</span>
+                                <span className="hidden md:block">Pause</span>
                             </>
                         ) : (
                             <>
                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M8 5v14l11-7z"/>
                                 </svg>
-                                <span>
+                                <span className="hidden md:block">
                                     {isCurrentlyPlaying ? 'Resume' : (episodeProgress ? 'Resume' : 'Listen Now')}
                                 </span>
                             </>

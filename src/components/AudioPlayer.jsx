@@ -144,10 +144,10 @@ const GlobalAudioPlayer = () => {
           <div className="hidden md:block md:flex md:flex-col md:justify-center md:items-start">
             {currentEpisode ? (
               <>
-                <span className="font-medium text-black dark:text-[#fff] text-[15px] truncate max-w-[200px]">
+                <span className="font-medium text-black dark:text-[#fff] text-[15px] truncate md:w-[90%] max-w-[200px]">
                   {currentEpisode.title}
                 </span>
-                <span className="font-medium text-gray-500 dark:text-[#b3b3b3] text-[13px]">
+                <span className="font-medium text-gray-500 dark:text-[#b3b3b3] truncate md:w-[90%] text-[13px]">
                   {currentEpisode.showTitle}
                 </span>
                 <span className="font-medium text-[#b3b3b3] text-[11px]">
@@ -258,7 +258,7 @@ const GlobalAudioPlayer = () => {
             value={volume} 
             onChange={handleVolumeChange}
             id="volumeControl"
-            className="w-24 mr-2"
+            className="w-20 md:w-24 md:mr-2"
           />
           <span className="hidden md:block text-sm ml-2 w-8">{volume}%</span>
         </div>
