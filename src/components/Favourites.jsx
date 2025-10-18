@@ -187,15 +187,15 @@ const Favourites = () => {
             <Header onSearch={handleSearch} searchTerm={searchTerm} />
 
             {/* Debug Button - Remove in production */}
-            <button 
+            {/* <button 
                 onClick={debugFavorites}
                 className="fixed top-20 right-4 z-50 bg-blue-500 text-white p-2 rounded text-sm"
                 style={{ display: 'none' }} // Hide by default, change to 'block' to see it
             >
                 Debug Favorites
-            </button>
+            </button> */}
 
-            <div className="h-full flex">
+            <div className="h-full flex flex">
                 {/* Sidebar - Fixed positioning */}
                 <div className={`
                     z-40 mt-[-20px] lg:mt-0
@@ -232,12 +232,12 @@ const Favourites = () => {
                                 {/* Debug and Sorting Controls */}
                                 <div className="flex flex-col md:flex-row gap-4 mt-4 md:mt-0">
                                     {/* Debug button - remove in production */}
-                                    <button 
+                                    {/* <button 
                                         onClick={debugFavorites}
                                         className="px-3 py-2 bg-yellow-500 text-black rounded text-sm md:hidden"
                                     >
                                         Debug
-                                    </button>
+                                    </button> */}
                                     
                                     <select 
                                         value={sortBy}
@@ -260,7 +260,7 @@ const Favourites = () => {
 
                             {/* Stats */}
                             <div className="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
-                                <span>{filteredFavorites.length} {searchTerm ? 'filtered' : ''} episodes</span>
+                                <span >{filteredFavorites.length} {searchTerm ? 'filtered' : ''} episodes</span>
                                 <span>•</span>
                                 <span>
                                     {Object.keys(groupedFavorites).length} shows
@@ -306,11 +306,11 @@ const Favourites = () => {
                                 )}
                             </div>
                         ) : (
-                            <div className="space-y-8">
+                            <div className="space-y-8 lg:max-w-[625px] xl:max-w-fit">
                                 {Object.keys(groupedFavorites).map(showTitle => (
                                     <div key={showTitle} className="space-y-4">
                                         {/* Show Header */}
-                                        <div className="flex items-center gap-4 mb-4">
+                                        <div className="flex items-center gap-2 md:gap-4 mb-4">
                                             <img 
                                                 src={groupedFavorites[showTitle][0]?.showImage || "/src/assets/SippiCup_logo.png"} 
                                                 alt={showTitle}
@@ -319,7 +319,7 @@ const Favourites = () => {
                                             <h2 className="text-2xl font-bold text-black dark:text-white">
                                                 {showTitle}
                                             </h2>
-                                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                                            <span className="hidden md:block text-sm text-gray-500 dark:text-gray-400">
                                                 ({groupedFavorites[showTitle].length} episodes)
                                             </span>
                                         </div>
@@ -340,7 +340,7 @@ const Favourites = () => {
                                                     onClick={() => hasAudio && handlePlayEpisode(favorite)}
                                                 >
                                                     {/* Episode Number */}
-                                                    <div className="flex-shrink-0 w-8 text-center">
+                                                    <div className="hidden lg:block flex-shrink-0 w-8 text-center">
                                                         <span className="text-sm text-gray-500 dark:text-gray-400">
                                                             {index + 1}
                                                         </span>
@@ -369,9 +369,9 @@ const Favourites = () => {
 
                                                     {/* Episode Info */}
                                                     <div className="flex-1 min-w-0">
-                                                        <div className="flex items-start justify-between mb-2">
-                                                            <div className="flex-1 min-w-0">
-                                                                <h3 className="font-medium text-black dark:text-white text-lg truncate">
+                                                        <div className="flex flex-col md:flex-row md:items-start justify-between md:mb-2">
+                                                            <div className="flex-1 w-full ">
+                                                                <h3 className="font-medium text-black dark:text-white text-lg w-full truncate">
                                                                     {favorite.episodeTitle}
                                                                     {isCurrentlyPlaying && (
                                                                         <span className="ml-2 text-xs text-[#1ed760]">Playing</span>
@@ -380,18 +380,18 @@ const Favourites = () => {
                                                                         <span className="ml-2 text-xs text-red-500">No Audio</span>
                                                                     )}
                                                                 </h3>
-                                                                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                                                                <p className=" text-gray-600 dark:text-gray-400 text-sm">
                                                                     Season {favorite.seasonNumber} Episode {favorite.episodeNumber}
                                                                 </p>
                                                             </div>
                                                             
-                                                            <div className="flex items-center gap-2 ml-4">
+                                                            <div className="flex items-center gap-2 md:ml-4">
                                                                 <button 
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
                                                                         handleNavigateToPodcast(favorite, e);
                                                                     }}
-                                                                    className="px-3 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors opacity-0 group-hover:opacity-100"
+                                                                    className="px-3 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 opacity-0 group-hover:opacity-100"
                                                                 >
                                                                     View Show
                                                                 </button>
@@ -411,13 +411,13 @@ const Favourites = () => {
                                                         </div>
                                                         
                                                         {/* Episode Description */}
-                                                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-2 line-clamp-2">
+                                                        <p className="hidden md:block text-gray-600 dark:text-gray-400 text-sm mb-2 line-clamp-2">
                                                             {favorite.episodeDescription || 'No description available'}
                                                         </p>
                                                         
                                                         {/* Audio URL Debug Info - Remove in production */}
                                                         {!hasAudio && favorite.audioUrl && (
-                                                            <div className="mt-2 p-2 bg-yellow-100 dark:bg-yellow-900 rounded text-xs">
+                                                            <div className="hidden md:block mt-2 p-2 bg-yellow-100 dark:bg-yellow-900 rounded text-xs">
                                                                 <p className="text-yellow-800 dark:text-yellow-200">
                                                                     <strong>Debug Info:</strong> URL exists but failed validation: {favorite.audioUrl}
                                                                 </p>
@@ -455,31 +455,39 @@ const Favourites = () => {
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             if (hasAudio) {
-                                                                handlePlayEpisode(favorite);
+                                                            handlePlayEpisode(favorite);
                                                             } else {
-                                                                alert(`This episode does not have a valid audio file available. 
-                                                                    
-Audio URL: ${favorite.audioUrl || 'No URL found'}
-
-You may need to re-add this episode from the podcast page.`);
+                                                            alert(`This episode does not have a valid audio file available. 
+                                                                Audio URL: ${favorite.audioUrl || 'No URL found'}
+                                                                You may need to re-add this episode from the podcast page.`);
                                                             }
                                                         }}
-                                                        className={`flex-shrink-0 p-3 rounded-full transition-colors ${
+                                                        className={`flex items-center gap-1 flex-shrink-0 md:min-w-[130px] p-3 rounded-full transition-colors ${
                                                             hasAudio 
-                                                                ? 'bg-[#65350F] hover:bg-[#1ed760] text-white' 
-                                                                : 'bg-gray-400 cursor-not-allowed text-gray-200'
+                                                            ? isCurrentlyPlaying 
+                                                                ? 'bg-[#1ed760] hover:bg-[#1ed760] text-white' 
+                                                                : 'bg-[#65350F] hover:bg-[#1ed760] text-white'
+                                                            : 'bg-gray-400 cursor-not-allowed text-gray-200'
                                                         }`}
                                                         title={hasAudio ? (isCurrentlyPlaying ? 'Pause' : 'Play') : `No audio available: ${favorite.audioUrl || 'No URL'}`}
                                                         disabled={!hasAudio}
-                                                    >
+                                                        >
                                                         {isCurrentlyPlaying ? (
-                                                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                            <>
+                                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                                                 <path d="M6 4h4v16H6zM14 4h4v16h-4z"/>
                                                             </svg>
+                                                            <span className="hidden md:block">Pause</span>
+                                                            </>
                                                         ) : (
-                                                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                            <>
+                                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                                                 <path d="M8 5v14l11-7z"/>
                                                             </svg>
+                                                            <span className="hidden md:block">
+                                                                {progress ? 'Resume' : 'Listen Now'}
+                                                            </span>
+                                                            </>
                                                         )}
                                                     </button>
                                                 </div>

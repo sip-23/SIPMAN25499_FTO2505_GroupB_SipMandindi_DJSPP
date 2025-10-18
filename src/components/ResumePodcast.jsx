@@ -38,23 +38,33 @@ const ResumePlaylistPage = () => {
     useEffect(() => {
         console.log('Sorting episodes, recentlyPlayed count:', recentlyPlayed.length);
         
-        if (recentlyPlayed.length > 0) {
+        const loadAndSortEpisodes = () => {
+            if (recentlyPlayed.length > 0) {
             const sorted = [...recentlyPlayed].sort((a, b) => {
                 const progressA = getEpisodeProgress(a.episodeId);
                 const progressB = getEpisodeProgress(b.episodeId);
                 
+                // Sort by last listened date, most recent first
                 if (progressA && progressB) {
-                    return new Date(progressB.lastListened) - new Date(progressA.lastListened);
+                return new Date(progressB.lastListened) - new Date(progressA.lastListened);
                 }
+                // If one has progress and the other doesn't, put the one with progress first
+                if (progressA && !progressB) return -1;
+                if (!progressA && progressB) return 1;
+                
                 return 0;
             });
             setSortedEpisodes(sorted);
-            setIsLoading(false);
-            
             console.log('After sorting - sortedEpisodes count:', sorted.length);
-        } else {
+            } else {
+            console.log('No recently played episodes found in state');
+            }
             setIsLoading(false);
-        }
+        };
+
+        // Small delay to ensure state is properly set
+        const timer = setTimeout(loadAndSortEpisodes, 50);
+        return () => clearTimeout(timer);
     }, [recentlyPlayed, getEpisodeProgress]);
 
     // Debug on component mount and when data changes
@@ -366,17 +376,27 @@ const ResumePlaylistPage = () => {
                                                     e.stopPropagation();
                                                     handlePlayEpisode(episode);
                                                 }}
-                                                className="flex-shrink-0 p-3 rounded-full bg-[#65350F] hover:bg-[#1ed760] text-white transition-colors"
+                                                className={`flex-shrink-0 p-3 rounded-full transition-colors flex items-center gap-1 ${
+                                                    isCurrentlyPlaying 
+                                                    ? 'bg-[#1ed760] hover:bg-[#1db954] text-white' 
+                                                    : 'bg-[#65350F] hover:bg-[#7a4212] text-white'
+                                                }`}
                                                 title={isCurrentlyPlaying ? 'Pause' : 'Play'}
-                                            >
+                                                >
                                                 {isCurrentlyPlaying ? (
+                                                    <>
                                                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                                         <path d="M6 4h4v16H6zM14 4h4v16h-4z"/>
                                                     </svg>
+                                                    <span className="hidden md:inline">Pause</span>
+                                                    </>
                                                 ) : (
+                                                    <>
                                                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                                         <path d="M8 5v14l11-7z"/>
                                                     </svg>
+                                                    <span className="hidden md:inline">Play</span>
+                                                    </>
                                                 )}
                                             </button>
                                         </div>

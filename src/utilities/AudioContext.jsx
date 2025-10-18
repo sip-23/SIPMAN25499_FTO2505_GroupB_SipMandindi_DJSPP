@@ -137,8 +137,8 @@ export const AudioProvider = ({ children }) => {
     const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
       
-      // Save progress every 5 seconds (reduced frequency)
-      if (currentEpisode && Math.floor(audio.currentTime) % 5 === 0) {
+      // Save progress every 2 seconds (reduced frequency)
+      if (currentEpisode && Math.floor(audio.currentTime) % 2 === 0) {
         saveProgress(audio.currentTime);
       }
     };
@@ -200,9 +200,18 @@ export const AudioProvider = ({ children }) => {
     const { episodeId, audioUrl, title, season, episode, showTitle, showImage } = episodeData;
 
     console.log('Playing episode:', title);
+
+    if (currentEpisode?.episodeId === episodeId) {
+        console.log('Toggling play/pause for current episode');
+        return togglePlayPause();
+    }
+
+    if (isPlaying && currentEpisode) {
+        audioRef.current.pause();
+    }
     
     // Stop current playback
-    audioRef.current.pause();
+    // audioRef.current.pause();
     
     // Set new episode
     const newEpisode = {
