@@ -42,7 +42,7 @@ Build a polished, production-ready React application that offers an engaging and
   - Check updated : [Figma design Link](https://www.figma.com/design/5vvqOdJYHcn6BMR8QZ5WPA/Prototyping-in-Figma?node-id=3833-2013&t=Ym4md3F2PlKb4uD4-0)
 - Use a consistent **colour scheme, typography, spacing, and sizing**.
 - I deployed this app to **Vercel** using my **custom domain or URL**
-  - Please use the following updated link: [Sippi-Cup Podcasts Vercel Deployment Link](https://aws.amazon.com/free/webapps/?trk=accbfd85-cb9b-42bf-9a67-f3103fcaa74e&sc_channel=ps&ef_id=CjwKCAjw2vTFBhAuEiwAFaScwlmGJILp335PL0feTbYfXQZegrMm2XPuFhNCM4p2TSS34AZWfHXazBoCtpEQAvD_BwE:G:s&s_kwcid=AL!4422!3!645060134137!p!!g!!web%20server%20host!19574556881!145779844512&gad_campaignid=19574556881&gbraid=0AAAAADjHtp_-XnyA9YENpMG7FH5NhvaJ4&gclid=CjwKCAjw2vTFBhAuEiwAFaScwlmGJILp335PL0feTbYfXQZegrMm2XPuFhNCM4p2TSS34AZWfHXazBoCtpEQAvD_BwE)
+  - Please use the following updated link: [Sippi-Cup Podcasts Vercel Deployment Link](https://sipman-25499-fto-2505-group-b-sip-m-rouge.vercel.app/)
 - I added a **custom favicon** for easy identification in browser tabs which looks like this:
 
 ![Sippi-Cup Podcasts custom favicon](</Logo/SippiCup_favicon.png>)
