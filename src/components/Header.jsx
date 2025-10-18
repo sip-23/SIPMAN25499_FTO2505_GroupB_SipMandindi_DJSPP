@@ -95,7 +95,7 @@ const Header = ({ onSearch , searchTerm }) => {
 
             <div className="flex items-center gap-4">
                 {/* Menu Toggle and Lock Icons */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center md:gap-2 w-[15%] md:w-fit">
                     {/* Open Lock Icon (Sidebar Closed) */}
                     <svg 
                         id="open-lock" 
@@ -146,14 +146,14 @@ const Header = ({ onSearch , searchTerm }) => {
                 <div className="flex items-center">
                     {IMAGES.LOGO && (
                         <img 
-                            className={`w-[200px] h-12 md:w-[170px] ${darkMode ? 'block' : 'hidden'}`} 
+                            className={`w-[2500px] h-12 md:w-[170px] ${darkMode ? 'block' : 'hidden'}`} 
                             src={IMAGES.DARKLOGO} 
                             alt="Dark mode logo"
                         />
                     )}
                     {IMAGES.LOGO && (
                         <img 
-                            className={`w-[200px] h-12 md:w-[170px] ${darkMode ? 'hidden' : 'block'}`} 
+                            className={`w-[290px] h-12 md:w-[170px] ${darkMode ? 'hidden' : 'block'}`} 
                             src={IMAGES.LIGHTLOGO} 
                             alt="Light mode logo"
                         />
@@ -164,7 +164,7 @@ const Header = ({ onSearch , searchTerm }) => {
             
             {/* Search container */}
             <div className="flex items-center w-[350px] h-10 px-3">
-                <IoSearchOutline color="#b3b3b3" className=" mr-3" size={22}/>
+                <IoSearchOutline color="#b3b3b3" className="hidden md:block mr-3" size={22}/>
                 <input
                     ref={searchInputRef} 
                     type="text" 
@@ -172,7 +172,7 @@ const Header = ({ onSearch , searchTerm }) => {
                     value={searchValue}
                     onChange={handleSearchChange}
                     onKeyDown={handleKeyPress}
-                    className="border border-[#b3b3b3] rounded-[16px] dark:opacity-30 opacity-50 bg-transparent dark:bg-[#121212] w-full py-2 px-4 dark:placeholder:text-[#b3b3b3] placeholder:text-[#000000] hover:border-[#9A7B4F]" 
+                    className="border border-[#b3b3b3] rounded-[16px] dark:opacity-30 opacity-50 bg-transparent dark:bg-[#121212] md:w-full ml-2 md:ml-0 w-20  py-2 px-4 dark:placeholder:text-[#b3b3b3] placeholder:text-[#000000] hover:border-[#9A7B4F]" 
                 />
 
                 {/* Adding Clear search button */}
