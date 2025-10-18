@@ -1,7 +1,25 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'; 
 
+/**
+ * @description
+ * Provides a global layout context for managing sidebar visibility and responsiveness.
+ * Automatically detects mobile/desktop viewport changes, syncs sidebar state with localStorage,
+ * and updates the DOM classes to reflect transitions.
+ * 
+ * @module LayoutContext
+ * 
+ * React Context for layout and sidebar state management.
+ * @type {React.Context<Object>}
+ */
 const LayoutContext = createContext();
 
+/**
+ * Custom hook for accessing the Layout Context.
+ * Ensures that components can only access layout state within a LayoutProvider.
+ * 
+ * @returns {Object} Layout context value containing state and actions.
+ * @throws {Error} If called outside of a LayoutProvider.
+ */
 export const useLayout = () => {
   const context = useContext(LayoutContext);
   if (!context) {
@@ -10,7 +28,19 @@ export const useLayout = () => {
   return context;
 };
 
+/**
+ * Provider component that manages layout-related state and makes it available
+ * to all child components via React Context.
+ 
+ * 
+ * @param {Object} props
+ * @param {React.ReactNode} props.children - Components that consume layout context.
+ * @returns {JSX.Element} The provider component wrapping all children.
+ */
 export const LayoutProvider = ({ children }) => {
+  /** @type {[boolean, Function]} Sidebar visibility state. */
+  /** @type {[boolean, Function]} Indicates whether the current view is mobile. */
+  /** @type {[boolean, Function]} Marks whether initialization logic has completed. */
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileView, setIsMobileView] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -86,6 +116,12 @@ export const LayoutProvider = ({ children }) => {
     updateSidebarDOM(isSidebarOpen);
   }, [isSidebarOpen]);
 
+   /**
+   * Updates the DOM sidebar element's CSS classes to reflect visibility transitions.
+   * Adds/removes animation and display classes based on open/close state.
+   * 
+   * @param {boolean} isOpen - Whether the sidebar should be visible.
+   */
   const updateSidebarDOM = (isOpen) => {
     const sidebar = document.getElementById('sidebar');
     if (sidebar) {

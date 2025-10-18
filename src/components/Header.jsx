@@ -6,8 +6,14 @@ import { useTheme } from "../utilities/ThemeContext";
 
 /**
  * Header Component
- *
  * Top navigation bar
+ * 
+ * @param {Object} props - Component properties.
+ * @param {Function} props.onSearch - Callback function triggered when the search term changes.
+ * @param {string} [props.searchTerm] - The current search term value (optional).
+ *
+ * @returns {JSX.Element} Rendered Header component.
+ * 
  * @component
  */
 const Header = ({ onSearch , searchTerm }) => {
@@ -42,6 +48,12 @@ const Header = ({ onSearch , searchTerm }) => {
         }, 300);
     };
 
+   /**
+   * Handles the Enter key press inside the search field.
+   * Executes search immediately, bypassing the debounce delay.
+   *
+   * @param {React.KeyboardEvent<HTMLInputElement>} e - Keyboard event.
+   */
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();

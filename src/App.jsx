@@ -10,6 +10,23 @@ import { LayoutProvider } from './layouts/LayoutContext.jsx'
 import { AudioProvider } from './utilities/AudioContext.jsx'
 import GlobalAudioPlayer from './components/AudioPlayer.jsx'
 
+
+/**
+ * App Component
+ *
+ * The root component of the podcast web application.
+ * Sets up global providers and routing for the application.
+ *
+ * 1. Providers:
+ * - ThemeProvider: manages dark/light theme toggling across the app
+ * - LayoutProvider: manages sidebar state and responsive layout
+ * - AudioProvider: manages global audio playback, recently played episodes, and playlist state
+ * 2. Routing:
+ * 
+ * @component
+ *
+ * @returns {JSX.Element} The application root with providers and routes.
+ */
 function App() {
   return (
     <ThemeProvider>

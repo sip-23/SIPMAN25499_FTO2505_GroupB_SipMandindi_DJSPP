@@ -2,9 +2,21 @@ import { useState, useEffect } from "react";
 
 /**
  * Pagination Component
- * 
- * The count or numbered pages with navigation buttons
+ *
+ * Displays paginated navigation for lists of items.
+ * Shows numbered page buttons, "Previous" and "Next" controls,
+ * and a summary of currently displayed results.
+ *
  * @component
+ * @param {Object} props - Component props
+ * @param {number} props.currentPage - The current active page (1-based)
+ * @param {number} props.totalPages - Total number of pages
+ * @param {number} props.totalPosts - Total number of items in the list
+ * @param {number} props.postsPerPage - Number of items displayed per page
+ * @param {function(number): void} props.onPageChange - Callback function called when a new page is selected
+ *
+ *
+ * @returns {JSX.Element|null} JSX for pagination controls or null if only one page exists
  */
 const Pagination = ({ 
     currentPage, 

@@ -1,6 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { useAudio } from '../utilities/AudioContext';
 
+
+
+/**
+ * ResumePlaylist Component
+ * 
+ * Displays a list of recently played podcast episodes and allows the user to resume playback.
+ * @component
+ 
+ * @returns {JSX.Element} Resume playlist with episode cards, progress bars, and navigation controls
+ */
 const ResumePlaylist = () => {
     const navigate = useNavigate();
     const { recentlyPlayed, playEpisode, currentEpisode, isPlaying, getEpisodeProgress } = useAudio();

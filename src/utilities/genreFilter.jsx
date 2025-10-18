@@ -2,8 +2,15 @@ import { useState, useEffect } from "react";
 
 /**
  * GenreFilter Component
- * Provides genre-based filtering for podcasts
+ * 
+ * Provides a dropdown filter for podcast genres. Fetches available genres from an API
+ * and allows the user to select one. Calls a callback function when a genre is selected.
+ *
  * @component
+ * @param {Object} props - Component props
+ * @param {function(string|number): void} props.onGenreChange - Callback called when a genre is selected. Passes the genre ID or "all".
+ * 
+ * @returns {JSX.Element} A select dropdown for genres with loading/error handling
  */
 const GenreFilter = ({ onGenreChange }) => {
     const [selectedGenre, setSelectedGenre] = useState('all');

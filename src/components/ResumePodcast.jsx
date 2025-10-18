@@ -5,6 +5,17 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 import { useLayout } from "../layouts/LayoutContext.jsx";
 
+/**
+ * ResumePlaylistPage Component
+ *
+ * Displays a user's resume playlist, allowing them to continue listening to recently played episodes.
+ * Integrates with AudioContext for playback control, LayoutContext for sidebar state, 
+ * and localStorage for persisted playback history.
+ *
+ * @component
+ *
+ * @returns {JSX.Element} The resume playlist page.
+ */
 const ResumePlaylistPage = () => {
     const navigate = useNavigate();
     const { 
@@ -41,7 +52,11 @@ const ResumePlaylistPage = () => {
         console.log('DEBUG - isInitialized:', isInitialized);
     };
 
-    
+    /**
+   * Retrieves playback progress for a given episode
+   * @param {string} episodeId - Unique ID of the episode
+   * @returns {Object|null} Progress object containing currentTime, duration, lastListened, completed or null if unavailable
+   */
     const getProgress = (episodeId) => {
         
         const progressFromContext = getEpisodeProgress(episodeId);
@@ -69,6 +84,11 @@ const ResumePlaylistPage = () => {
         return null;
     };
 
+    /**
+   * Calculates playback progress as a percentage
+   * @param {string} episodeId - Unique ID of the episode
+   * @returns {number} Progress percentage (0-100)
+   */
     const getProgressPercentage = (episodeId) => {
         const progress = getProgress(episodeId);
         if (!progress || !progress.duration || progress.duration === 0) return 0;

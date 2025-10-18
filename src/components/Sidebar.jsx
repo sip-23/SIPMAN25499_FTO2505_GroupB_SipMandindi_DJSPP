@@ -3,12 +3,29 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "../utilities/ThemeContext";
 import { useLayout } from "../layouts/LayoutContext";
 
+/**
+ * Sidebar Component
+ *
+ * A responsive sidebar for navigation and theme control.
+ * Includes navigation links, a close button for mobile, and a dark/light theme toggle switch.
+ * Uses layout and theme contexts to manage global UI state.
+ *
+ * @component
+ */
 const Sidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { darkMode, toggleTheme } = useTheme();
     const { closeSidebar, isMobileView, isSidebarOpen } = useLayout();
 
+   /**
+   * Handles page navigation when a sidebar item is clicked.
+   * Automatically closes the sidebar on mobile view after navigation.
+   *
+   * @function
+   * @param {string} path - The target route path (e.g., "/favourites", "/recommended").
+   * @returns {void}
+   */
     const handleNavigation = (path) => {
         navigate(path);
         // Close sidebar on mobile navigation
@@ -17,11 +34,22 @@ const Sidebar = () => {
         }
     };
 
-    // Theme toggle functionality
+   /**
+   * Toggles between light and dark themes.
+   *
+   * @function
+   */
     const handleThemeToggle = () => {
         toggleTheme();
     };
 
+   /**
+   * Determines if a navigation item is currently active based on the route path.
+   *
+   * @function
+   * @param {string} path - The route path to check.
+   * @returns {boolean} True if the current location matches the path.
+   */
     const isActive = (path) => {
         return location.pathname === path;
     };

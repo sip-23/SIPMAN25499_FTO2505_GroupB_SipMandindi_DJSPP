@@ -5,6 +5,12 @@ import RenderRow from "../views/renderRows";
 import { useFetchPodcasts } from "../utilities/fetchPodcasts";
 import { useLayout } from "../layouts/LayoutContext.jsx";
 
+/**
+ * Recommended Component
+ * 
+ * Recommended page where liked podcast are rendered. The suggester of the podcast app. :)
+ * @component
+ */
 const Recommended = () => {
     const [recommendations, setRecommendations] = useState({});
     const [allPodcasts, setAllPodcasts] = useState([]);

@@ -1,7 +1,20 @@
 import React, { createContext, useContext, useRef, useState, useEffect } from 'react'; 
 
+/**
+ * @description
+ * Provides a global audio playback context for managing podcast or audio episode playback.
+ * Handles player state (play, pause, seek, volume, repeat, shuffle),
+ * playback progress persistence via localStorage, and recently played episode tracking.
+ * 
+ * @module AudioContext
+ */
 const AudioContext = createContext();
 
+/**
+ * Custom React Hook for accessing the audio context.
+ * 
+ * @returns {Object} The context value containing audio state and functions.
+ */
 export const useAudio = () => {
   const context = useContext(AudioContext);
   if (!context) {
@@ -10,6 +23,14 @@ export const useAudio = () => {
   return context;
 };
 
+/**
+ * Provides audio playback context to children components.
+ * Handles player lifecycle, localStorage synchronization, and event listeners.
+ * 
+ * @param {Object} props
+ * @param {React.ReactNode} props.children - Components that will consume the audio context.
+ * @returns {JSX.Element} The context provider wrapping child components.
+ */
 export const AudioProvider = ({ children }) => {
   const audioRef = useRef(new Audio());
   const [currentEpisode, setCurrentEpisode] = useState(null);
@@ -356,7 +377,12 @@ export const AudioProvider = ({ children }) => {
     return playbackHistory[episodeId] || null;
   };
 
-  // Function to directly read from localStorage (for components that need immediate access)
+    /**
+   * Gets progress data directly from localStorage.
+   * Useful when components need up-to-date progress data before context syncs.
+   * @param {string} episodeId
+   * @returns {?Object} Episode progress or null if not found.
+   */
   const getProgressFromStorage = (episodeId) => {
     try {
       const savedHistory = localStorage.getItem('playbackHistory');

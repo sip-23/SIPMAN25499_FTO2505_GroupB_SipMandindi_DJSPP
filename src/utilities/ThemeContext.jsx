@@ -2,6 +2,21 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
+/**
+ * Context providing theme state (light/dark mode) and toggle function.
+ *
+ * @typedef {Object} ThemeContextValue
+ * @property {boolean} darkMode - Whether dark mode is currently enabled.
+ * @property {function(): void} toggleTheme - Function to toggle between light and dark mode.
+
+ * React hook to access theme state and toggle function.
+ *
+ * Must be used within a ThemeProvider.
+ *
+ * @function
+ * @returns {ThemeContextValue} - The current theme context value.
+ *
+ */
 export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (!context) {
@@ -10,6 +25,16 @@ export const useTheme = () => {
   return context;
 };
 
+
+/**
+ * ThemeProvider component to manage and provide theme state.
+ * Handles initialization from localStorage or system preference,
+ * applies theme to the document body, and provides a toggle function.
+ *
+ * @function
+ * @param {Object} props
+ * @param {React.ReactNode} props.children - Components wrapped by the provider.
+ */
 export const ThemeProvider = ({ children }) => {
   const [darkMode, setDarkMode] = useState(false);
 
@@ -35,6 +60,11 @@ export const ThemeProvider = ({ children }) => {
     initializeTheme();
   }, []);
 
+  /**
+   * Toggles between dark and light mode.
+   * Updates the document body class and persists preference in localStorage.
+   *
+   */
   const toggleTheme = () => {
     const newDarkMode = !darkMode;
     setDarkMode(newDarkMode);

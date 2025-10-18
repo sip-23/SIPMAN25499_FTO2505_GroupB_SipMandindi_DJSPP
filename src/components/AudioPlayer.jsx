@@ -1,6 +1,31 @@
 import React, { useState, useRef, useEffect } from 'react'; 
 import { useAudio } from '../utilities/AudioContext';
 
+
+/**
+ * ResumePlaylist
+ * 
+ * A component that displays a "Resume Playlist" section for the user, showing the most recently
+ * played podcast episodes. Allows the user to resume playback, view progress, and navigate to
+ * the full playlist or individual podcast pages.
+ * 
+ * Hooks:
+ * - `useNavigate` from react-router-dom for programmatic navigation
+ * - `useAudio` custom hook for accessing global audio state and controls:
+ *    - `recentlyPlayed` - array of recently played episodes
+ *    - `playEpisode(episode)` - plays the selected episode
+ *    - `currentEpisode` - currently playing episode
+ *    - `isPlaying` - boolean indicating if audio is currently playing
+ *    - `getEpisodeProgress(episodeId)` - retrieves currentTime and duration for an episode
+ * 
+
+ * @function getProgressPercentage
+ * @param {string} episodeId - The ID of the episode
+ * @returns {number} - Progress as a percentage (0-100)
+ * @description Calculates the playback progress for an episode using `getEpisodeProgress`.
+ * 
+ * Returns: JSX.Element
+ */
 const GlobalAudioPlayer = () => {
   const {
     currentEpisode,

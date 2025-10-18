@@ -2,6 +2,26 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import PodcastCard from "../components/podcastCard.jsx";
 import { useLayout } from "../layouts/LayoutContext.jsx";
 
+/**
+ * @description 
+ * This component renders a horizontally scrollable row of podcast cards with 
+ * responsive sizing, adaptive behavior based on screen size and sidebar state,
+ * and persistent randomization for recommendation rows. It includes smooth scrolling, 
+ * arrow key navigation, and visual scroll indicators.
+ * * Renders a row of podcast cards with scroll controls, adaptive card widths, 
+ * and session-persistent recommendations.
+ * 
+ * @component
+ * @param {Object} props - Component properties.
+ * @param {string} props.title - The title displayed above the podcast row.
+ * @param {Array<Object>} props.podcasts - Array of podcast objects to display.
+ * Each podcast object is expected to include at least an `id` property.
+ * @param {Function} props.onPodcastSelect - Callback function triggered when a podcast is selected.
+ * @param {boolean} [props.isRecommendationRow=false] - Flag indicating whether the row should display
+ * randomized and session-persistent recommended podcasts.
+ * 
+ * @returns {JSX.Element|null} A responsive, scrollable row of podcast cards with dynamic behavior.
+ */
 const HomeRenderRow = ({ title, allPodcasts, onPodcastSelect }) => {
     const scrollContainerRef = useRef(null);
     const [showLeftButton, setShowLeftButton] = useState(false);

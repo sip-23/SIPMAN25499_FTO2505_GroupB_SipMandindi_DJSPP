@@ -5,6 +5,12 @@ import Header from "./Header.jsx";
 import { useLayout } from "../layouts/LayoutContext.jsx";
 import { useAudio } from "../utilities/AudioContext.jsx";
 
+/**
+ * Favourites Component
+ * 
+ * Favourites page where liked podcast are rendered. The heart of the podcast app. :)
+ * @component
+ */
 const Favourites = () => {
     const [favorites, setFavorites] = useState([]);
     const [sortBy, setSortBy] = useState('dateAdded');

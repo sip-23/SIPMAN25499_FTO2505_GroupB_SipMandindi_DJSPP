@@ -22,6 +22,13 @@ const PodcastDetail = () => {
     const [podcastUrl] = useState("https://podcast-api.netlify.app");
     
     // Fetch all podcasts
+    /**
+     * Fetch all podcasts data using a custom hook.
+     * @typedef {Object} FetchPodcastsResult
+     * @property {Array<Object>} data - The array of all podcasts.
+     * @property {boolean} isLoading - Indicates if data is currently being fetched.
+     * @property {string|null} error - Error message, if fetching fails.
+     */
     const { 
         data: allPodcasts,
         isLoading: podcastsLoading, 
@@ -29,6 +36,12 @@ const PodcastDetail = () => {
     } = useFetchPodcasts(podcastUrl);
 
     // State management
+    /** @state {Object|null} podcastData - Detailed data of the selected podcast. */
+    /** @state {string[]} podcastGenres - List of genre names for the podcast. */
+    /** @state {Object|null} selectedSeason - Currently selected season details. */
+    /** @state {Array<Object>} currentSeasons - All seasons for the selected podcast. */
+    /** @state {boolean} isLoadingSeasons - Indicates if season data is currently being fetched. */
+    /** @state {string|null} seasonsError - Stores error message for season fetching. */
     const [podcastData, setPodcastData] = useState(null);
     const [podcastGenres, setPodcastGenres] = useState([]);
     const [selectedSeason, setSelectedSeason] = useState(null);
@@ -37,11 +50,23 @@ const PodcastDetail = () => {
     const [seasonsError, setSeasonsError] = useState(null);
 
     // Helper Functions
+    /**
+     * Finds a podcast by its ID from the list of all podcasts.
+     * 
+     * @param {string} id - The ID of the podcast.
+     * @returns {Object|undefined} The podcast object, if found.
+     */
     const getPodcastById = (id) => {
         return allPodcasts.find(podcast => podcast.id === id);
     };
 
     // Another helper function
+    /**
+     * Formats a date string into a readable format (e.g., "January 1, 2025").
+     * 
+     * @param {string} dateString - The date string to format.
+     * @returns {string} Formatted date or "Unknown" if invalid.
+     */
     const getFormattedDate = (dateString) => {
         if (!dateString) return "Unknown";
         const updatedDate = new Date(dateString);
@@ -53,6 +78,13 @@ const PodcastDetail = () => {
     };
 
     // Fetch seasons data for a specific podcast
+    /**
+     * Fetches all seasons data for a given podcast.
+     * 
+     * @async
+     * @param {string} podcastId - The podcast ID for which to fetch seasons.
+     * @returns {Promise<void>}
+     */
     const fetchSeasonsData = async (podcastId) => {
         setIsLoadingSeasons(true);
         setSeasonsError(null);
@@ -81,6 +113,13 @@ const PodcastDetail = () => {
     };
 
     // Fetch genre data for a specific genre ID
+    /**
+     * Fetches genre data for a specific genre ID.
+     * 
+     * @async
+     * @param {string} genreId - The ID of the genre to fetch.
+     * @returns {Promise<Object|null>} The genre data, or null if fetching fails.
+     */
     const fetchGenreData = async (genreId) => {
         try {
             const response = await fetch(`https://podcast-api.netlify.app/genre/${genreId}`);
@@ -96,6 +135,13 @@ const PodcastDetail = () => {
     };
 
     // Fetch all genres for a podcast
+    /**
+     * Fetches all genre titles for a specific podcast.
+     * 
+     * @async
+     * @param {Object} podcast - The podcast object.
+     * @returns {Promise<string[]>} Array of genre titles.
+     */
     const fetchAllPodcastGenres = async (podcast) => {
         if (!podcast.genres || podcast.genres.length === 0) return [];
         
@@ -142,6 +188,12 @@ const PodcastDetail = () => {
         setSelectedSeason(season);
     };
 
+    /**
+     * Converts time from seconds to "minutes:seconds" format.
+     * 
+     * @param {number} seconds - Time in seconds.
+     * @returns {string} Time in "m:ss" format.
+     */
     const formatTime = (seconds) => {
         if (!seconds || isNaN(seconds)) return '0:00';
         const mins = Math.floor(seconds / 60);
@@ -150,6 +202,18 @@ const PodcastDetail = () => {
     };
 
     // Episode button component
+    /**
+     * Component representing a single episode item with play and favorite functionality.
+     * 
+     * @component
+     * 
+     * @param {Object} props
+     * @param {Object} props.episode - Episode object.
+     * @param {number} props.seasonNumber - The season number this episode belongs to.
+     * @param {number} props.index - Index of the episode in the list.
+     * 
+     * @returns {JSX.Element} The rendered episode row.
+     */
     const EpisodeButton = ({ episode, seasonNumber, index }) => {
         const [isFavorited, setIsFavorited] = useState(false);
         const { playEpisode, getEpisodeProgress, togglePlayPause, currentEpisode, isPlaying } = useAudio();
@@ -190,6 +254,11 @@ const PodcastDetail = () => {
             }
         };
 
+        /**
+         * Calculates playback progress percentage for an episode.
+         * 
+         * @returns {number} Progress percentage (0–100).
+         */
         const getProgressPercentage = () => {
             if (!episodeProgress || !episodeProgress.duration) return 0;
             return (episodeProgress.currentTime / episodeProgress.duration) * 100;
@@ -197,6 +266,11 @@ const PodcastDetail = () => {
 
         const isCurrentlyPlaying = currentEpisode?.episodeId === episodeId;
 
+        /**
+         * Adds or removes episode from favorites in localStorage.
+         * 
+         * @param {React.MouseEvent<HTMLButtonElement>} e - The button click event.
+         */
         const handleToggleFavorite = (e) => {
             e.stopPropagation();
             
