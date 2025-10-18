@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import PodcastCard from "../components/PodcastCard.jsx";
+import PodcastCard from "../components/podcastCard.jsx";
 import { useLayout } from "../layouts/LayoutContext.jsx";
 
 const RenderRow = ({ title, podcasts, onPodcastSelect, isRecommendationRow = false }) => {

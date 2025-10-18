@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import PodcastCard from "../components/PodcastCard.jsx";
-import { useLayout } from "../layouts/LayoutContext.jsx"; 
+import PodcastCard from "../components/podcastCard.jsx";
+import { useLayout } from "../layouts/LayoutContext.jsx";
 
 const HomeRenderRow = ({ title, allPodcasts, onPodcastSelect }) => {
     const scrollContainerRef = useRef(null);
