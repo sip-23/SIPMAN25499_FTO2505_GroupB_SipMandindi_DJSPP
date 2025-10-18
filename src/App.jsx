@@ -1,7 +1,7 @@
 import './App.css'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Home from "./components/Home.jsx"
-import PodcastDetail from "./components/podcastDetail.jsx"
+import PodcastDetail from "./components/PodcastDetail.jsx"
 import Favourites from "./components/Favourites.jsx"
 import Recommended from "./components/Recommended.jsx"
 import ResumePlaylistPage from "./components/ResumePodcast.jsx"
